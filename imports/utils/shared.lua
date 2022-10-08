@@ -1,20 +1,23 @@
 local math_random = math.random
 
 local Charset = {
-    numeric = { len = 10, chars = {} },
-    upper = { len = 26, chars = {} },
-    lower = { len = 26, chars = {} },
+    numeric = { len = 0, chars = {} },
+    upper = { len = 0, chars = {} },
+    lower = { len = 0, chars = {} },
 }
 do
     for i = 48, 57 do
         table.insert(Charset.numeric.chars, string.char(i))
     end
+    Charset.numeric.len = #Charset.numeric.chars
     for i = 65, 90 do
         table.insert(Charset.upper.chars, string.char(i))
     end
+    Charset.upper.len = #Charset.upper.chars
     for i = 97, 122 do
         table.insert(Charset.lower.chars, string.char(i))
     end
+    Charset.lower.len = #Charset.lower.chars
 end
 
 function self.randomString(length, options)
