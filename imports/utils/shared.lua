@@ -28,5 +28,3 @@ function self.randomString(length, options)
     end
     return ""
 end
-
-return self

@@ -18,7 +18,7 @@ setmetatable(lib, {
         else
             source = LoadResourceFile(resourceName, ("imports/%s/client.lua"):format(k))
         end
-        if not (shared) and not (source) then error(("^1[ Module \"%s\" not found ]^0"):format(k), 2) end
+        if not (shared or source) then error(("^1[ Module \"%s\" not found ]^0"):format(k), 2) end
         source = ("%s\n%s\nreturn self"):format(shared, source)
         local f, error = load(source)
         if not (error) and (f) then
