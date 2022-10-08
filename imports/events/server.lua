@@ -1,8 +1,7 @@
-function self.registerCallback(eventname, listener)
-    local eventData
-    eventData = AddEventHandler(eventname, function(...)
-        listener(...)
-        RemoveEventHandler(eventData)
+function self.registerServerCallback(eventname, listener)
+    local cbEventName = "cslib:serverCallbacks:" .. eventname
+    RegisterNetEvent(cbEventName, function(id, ...)
+        local src = source
+        TriggerClientEvent(cbEventName .. id, src, listener(...))
     end)
-    return eventData
 end

@@ -1,5 +1,4 @@
 local math_random = math.random
-local self = {}
 
 local Charset = {
     numeric = { len = 10, chars = {} },

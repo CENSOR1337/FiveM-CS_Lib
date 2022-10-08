@@ -1,7 +1,7 @@
 local RemoveEventHandler = RemoveEventHandler
 local AddEventHandler = AddEventHandler
 local RegisterNetEvent = RegisterNetEvent
-local self = {}
+local table_unpack = table.unpack
 
 ---@param eventname string
 ---@param listener function

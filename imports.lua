@@ -8,8 +8,7 @@ if not (bLibStarted) then error("^1[ Please enable Lua 5.4 ]^0", 2) end
 local LoadResourceFile = LoadResourceFile
 local bServer = IsDuplicityVersion()
 
-local lib = {}
-setmetatable(lib, {
+_ENV.__cslib_core = setmetatable({}, {
     __index = function(t, k)
         local source = ""
         local shared = LoadResourceFile(resourceName, ("imports/%s/shared.lua"):format(k))
@@ -19,13 +18,12 @@ setmetatable(lib, {
             source = LoadResourceFile(resourceName, ("imports/%s/client.lua"):format(k))
         end
         if not (shared or source) then error(("^1[ Module \"%s\" not found ]^0"):format(k), 2) end
-        source = ("%s\n%s\nreturn self"):format(shared, source)
-        local f, error = load(source)
-        if not (error) and (f) then
-            t[k] = f()
-        end
+        source = ("local self = __cslib_core\n%s\n%s\nreturn self"):format(shared, source)
+        local f, err = load(source)
+        if not (f) or (err) then error(("^1[ Module \"%s\" failed to load ]^0"):format(k), 2) end
+        t[k] = f()
         return t[k]
     end
 })
 
-_ENV.cslib = lib
+_ENV.cslib = _ENV.__cslib_core
