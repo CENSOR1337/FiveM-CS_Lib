@@ -17,8 +17,8 @@ _ENV.__cslib_core = setmetatable({}, {
         else
             source = LoadResourceFile(resourceName, ("imports/%s/client.lua"):format(k))
         end
-        if not (shared or source) then error(("^1[ Module \"%s\" not found ]^0"):format(k), 2) end
-        source = ("local self = __cslib_core\n%s\n%s\nreturn self"):format(shared, source)
+        if (shared == nil and source == nil) then error(("^1[ Module \"%s\" not found ]^0"):format(k), 2) end
+        source = ("local self = __cslib_core\n%s\n%s\nreturn self"):format(shared or "", source or "")
         local f, err = load(source)
         if not (f) or (err) then error(("^1[ Module \"%s\" failed to load ]^0"):format(k), 2) end
         t[k] = f()
