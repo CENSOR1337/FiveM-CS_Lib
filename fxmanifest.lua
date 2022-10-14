@@ -6,6 +6,7 @@ lua54 "yes"
 -- [[ Files ]]
 files {
 	"imports.lua",
+	"imports/core/*.lua",
 	"imports/**/client.lua",
 	"imports/**/shared.lua"
 }
