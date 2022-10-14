@@ -1,7 +1,7 @@
 function self.triggerServerCallback(eventname, listener, ...)
     local callbackId = self.utils.randomString(16)
     local cbEventName = "cslib:serverCallbacks:" .. eventname
-    self.events.onceNet(cbEventName .. callbackId, listener)
+    self.network.onceNet(cbEventName .. callbackId, listener)
     TriggerServerEvent(cbEventName, callbackId, ...)
 end
 
