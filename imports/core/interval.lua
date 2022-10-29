@@ -1,6 +1,7 @@
 local Interval = {}
 Interval.__index = Interval
-local _wait = Wait
+local Wait = Wait
+
 function Interval.new(handler, delay, options)
     local self = {}
     self.handler = handler
@@ -11,12 +12,12 @@ function Interval.new(handler, delay, options)
         self.id = ref
         if (self.bLoop) then
             while not (self.bDestroyed) do
-                _wait(self.delay)
+                Wait(self.delay)
                 if (self.bDestroyed) then break end
                 self.handler()
             end
         else
-            _wait(self.delay)
+            Wait(self.delay)
             if (self.bDestroyed) then return end
             self.handler()
         end

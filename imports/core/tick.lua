@@ -4,6 +4,7 @@ local handlersLength = 0
 local handlerKey = 10
 local bReAssignHanlders = false
 local bThreadCreated = false
+local Wait = Wait
 
 local function reassignHandler()
     table.wipe(handlersList)
