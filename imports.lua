@@ -34,8 +34,8 @@ _ENV.__cslib_core = setmetatable(getCoreSource(), {
         source = ("local self = {}\n%s\n%s\nreturn self"):format(shared or "", source or "")
         local f, err = load(source)
         if not (f) or (err) then error(("^1[ Module \"%s\" failed to load ]^0"):format(k), 2) end
-        t[k] = f()
-        return t[k]
+        rawset(t, k, f())
+        return rawget(t, k)
     end
 })
 
