@@ -9,7 +9,7 @@ local LoadResourceFile = LoadResourceFile
 local bServer = IsDuplicityVersion()
 
 local function getCoreSource()
-    local coreComponents = { "interval" }
+    local coreComponents = { "interval", "override", "tick" }
     local coreSource = "local self = {}\n"
     for _, component in ipairs(coreComponents) do
         local source = LoadResourceFile(resourceName, "imports/core/" .. component .. ".lua")
