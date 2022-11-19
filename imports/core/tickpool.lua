@@ -1,6 +1,6 @@
 local Wait = Wait
 
-tickpool = {}
+local tickpool = {}
 tickpool.__index = tickpool
 
 function tickpool.new(options)
@@ -18,7 +18,7 @@ function tickpool.new(options)
     return setmetatable(self, tickpool)
 end
 
-function tickpool:add(fnHandler)
+function tickpool:onTick(fnHandler)
     self.key += 1
     self.handlers.fn[self.key] = fnHandler
     self.bReassignTable = true
@@ -49,21 +49,22 @@ function tickpool:add(fnHandler)
     return self.key
 end
 
-function tickpool:remove(key)
+function tickpool:clearOnTick(key)
     self.handlers[key] = nil
     self.bReassignTable = true
 end
 
+self.tickpool = tickpool.new
 -- [[ Base Tick Pool ]] --
 local baseTickPool = nil
 function self.onTick(fnHandler)
     if not (baseTickPool) then
         baseTickPool = tickpool.new()
     end
-    return baseTickPool:add(fnHandler)
+    return baseTickPool:onTick(fnHandler)
 end
 
 function self.clearOnTick(key)
     if not (baseTickPool) then return end
-    baseTickPool:remove(key)
+    baseTickPool:clearOnTick(key)
 end
