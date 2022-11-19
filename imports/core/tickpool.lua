@@ -3,7 +3,7 @@ local Wait = Wait
 tickpool = {}
 tickpool.__index = tickpool
 
-function tickpool.new()
+function tickpool.new(options)
     local self = {}
     self.handlers = {
         fn = {},
@@ -13,18 +13,8 @@ function tickpool.new()
     self.bReassignTable = false
     self.bThreadCreated = false
     self.key = 10
-    self.tickRate = 0
+    self.tickRate = options.tickRate or 0
     return setmetatable(self, tickpool)
-end
-
-function tickpool:updateTable()
-    if not (self.bReassignTable) then return end
-
-    table.wipe(self.handlers.list)
-    for _, value in pairs(self.handlers.fn) do
-        self.handlers.list[#self.handlers.list + 1] = value
-    end
-    self.handlers.length = #self.handlers.list
 end
 
 function tickpool:add(fnHandler)
@@ -37,8 +27,12 @@ function tickpool:add(fnHandler)
         Citizen.CreateThreadNow(function()
             while true do
                 if (self.bReassignTable) then
-                    self:updateTable()
-                    if (self.handlers.length < 1) then
+                    table.wipe(self.handlers.list)
+                    for _, value in pairs(self.handlers.fn) do
+                        self.handlers.list[#self.handlers.list + 1] = value
+                    end
+                    self.handlers.length = #self.handlers.list
+                    if (self.handlers.length <= 0) then
                         self.bThreadCreated = false
                         break
                     end
