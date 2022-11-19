@@ -26,6 +26,7 @@ shared_script "@cs_lib/imports.lua"
 #### Network
     - [x] Server Callbacks
     - [ ] Replicated Variables
+    - [ ] RPC
 #### Collision
     - [ ] Sphere 
     - [ ] Box
@@ -35,4 +36,4 @@ shared_script "@cs_lib/imports.lua"
     - [ ] Keybinds
 #### Utilities
     - [x] Random String
-    - [x] Hasher 
+    - [ ] Hasher 
