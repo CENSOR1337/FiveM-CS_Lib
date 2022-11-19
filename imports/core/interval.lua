@@ -29,12 +29,12 @@ function interval:destroy()
     self.bDestroyed = true
 end
 
-function self.setInterval(handler, interval)
-    return interval.new(handler, interval, { bLoop = true })
+function self.setInterval(handler, time)
+    return interval.new(handler, time, { bLoop = true })
 end
 
-function self.setTimeout(handler, interval)
-    return interval.new(handler, interval, { bLoop = false })
+function self.setTimeout(handler, time)
+    return interval.new(handler, time, { bLoop = false })
 end
 
 function self.clearInterval(instance)
