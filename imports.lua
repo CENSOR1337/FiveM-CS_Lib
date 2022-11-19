@@ -17,7 +17,7 @@ local function initCoreComponent()
         end
     end
     load(classSource)()
-    local coreComponents = { "interval", "override", "tick" }
+    local coreComponents = { "interval", "override", "tickpool" }
     local coreSource = "local self = {}\n"
     for _, component in ipairs(coreComponents) do
         local source = LoadResourceFile(resourceName, "imports/core/" .. component .. ".lua")
