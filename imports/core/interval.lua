@@ -1,8 +1,8 @@
-local Interval = {}
-Interval.__index = Interval
+local interval = {}
+interval.__index = interval
 local Wait = Wait
 
-function Interval.new(handler, delay, options)
+function interval.new(handler, delay, options)
     local self = {}
     self.handler = handler
     self.delay = delay or 0
@@ -22,21 +22,21 @@ function Interval.new(handler, delay, options)
             self.handler()
         end
     end)
-    return setmetatable(self, Interval)
+    return setmetatable(self, interval)
 end
 
-function Interval:destroy()
+function interval:destroy()
     self.bDestroyed = true
 end
 
 function self.setInterval(handler, interval)
-    return Interval.new(handler, interval, { bLoop = true })
+    return interval.new(handler, interval, { bLoop = true })
 end
 
 function self.setTimeout(handler, interval)
-    return Interval.new(handler, interval, { bLoop = false })
+    return interval.new(handler, interval, { bLoop = false })
 end
 
-function self.clearInterval(interval)
-    interval:destroy()
+function self.clearInterval(instance)
+    instance:destroy()
 end
