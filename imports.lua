@@ -8,7 +8,15 @@ if not (bLibStarted) then error("^1[ Please enable Lua 5.4 ]^0", 2) end
 local LoadResourceFile = LoadResourceFile
 local bServer = IsDuplicityVersion()
 
-local function getCoreSource()
+local function initCoreComponent()
+    local classSource = ""
+    for _, className in ipairs({ "CEntity", "CPed", "CPlayer", "CVehicle" }) do
+        local source = LoadResourceFile(resourceName, string.format("imports/core/classes/%s.lua", className))
+        if (source) then
+            classSource = classSource .. "\n" .. source
+        end
+    end
+    load(classSource)()
     local coreComponents = { "interval", "override", "tick" }
     local coreSource = "local self = {}\n"
     for _, component in ipairs(coreComponents) do
@@ -21,7 +29,7 @@ local function getCoreSource()
     return load(coreSource)()
 end
 
-_ENV.__cslib_core = setmetatable(getCoreSource(), {
+_ENV.__cslib_core = setmetatable(initCoreComponent(), {
     __index = function(t, k)
         local source = ""
         local shared = LoadResourceFile(resourceName, ("imports/%s/shared.lua"):format(k))
