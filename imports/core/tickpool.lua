@@ -4,6 +4,7 @@ tickpool = {}
 tickpool.__index = tickpool
 
 function tickpool.new(options)
+    options = options or {}
     local self = {}
     self.handlers = {
         fn = {},
