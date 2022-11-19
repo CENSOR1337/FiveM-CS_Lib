@@ -48,6 +48,10 @@ function CEntity:getHeading()
     return GetEntityHeading(self.entity)
 end
 
+function CEntity:getDistanceBetweenCoords(coords)
+    return #(self:getCoords() - coords)
+end
+
 function CEntity:getDistanceBetweenEntity(targetEntity)
     local tCoords
     if (type(targetEntity) == "number") then
@@ -56,7 +60,7 @@ function CEntity:getDistanceBetweenEntity(targetEntity)
         tCoords = targetEntity:getCoords()
     end
 
-    return #(self:getCoords() - tCoords)
+    return self:getDistanceBetweenCoords(tCoords)
 end
 
 function CEntity:delete()

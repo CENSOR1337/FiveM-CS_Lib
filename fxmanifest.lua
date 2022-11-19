@@ -7,6 +7,7 @@ lua54 "yes"
 files {
 	"imports.lua",
 	"imports/core/*.lua",
+	"imports/core/classes/*.lua",
 	"imports/**/client.lua",
 	"imports/**/shared.lua"
 }
