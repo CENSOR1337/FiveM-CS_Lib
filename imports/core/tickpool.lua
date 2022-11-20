@@ -12,9 +12,9 @@ function tickpool.new(options)
         length = 0,
     }
     self.bReassignTable = false
-    self.bThreadCreated = false
     self.key = 10
     self.tickRate = options.tickRate or 0
+    self.interval = nil
     return setmetatable(self, tickpool)
 end
 
@@ -23,27 +23,24 @@ function tickpool:onTick(fnHandler)
     self.handlers.fn[self.key] = fnHandler
     self.bReassignTable = true
 
-    if not (self.bThreadCreated) then
-        self.bThreadCreated = true
-        Citizen.CreateThreadNow(function()
-            while true do
-                if (self.bReassignTable) then
-                    table.wipe(self.handlers.list)
-                    for _, value in pairs(self.handlers.fn) do
-                        self.handlers.list[#self.handlers.list + 1] = value
-                    end
-                    self.handlers.length = #self.handlers.list
-                    if (self.handlers.length <= 0) then
-                        self.bThreadCreated = false
-                        break
-                    end
+    if not (self.interval) then
+        self.interval = cslib.setInterval(function()
+            local listEntries = self.handlers.list
+            if (self.bReassignTable) then
+                table.wipe(listEntries)
+                for _, value in pairs(self.handlers.fn) do
+                    listEntries[#listEntries + 1] = value
                 end
-                for i = 1, self.handlers.length, 1 do
-                    self.handlers.list[i]()
+                self.handlers.length = #listEntries
+                if (self.handlers.length <= 0) then
+                    self.interval:destroy()
+                    self.interval = nil
                 end
-                Wait(self.tickRate)
             end
-        end)
+            for i = 1, self.handlers.length, 1 do
+                listEntries[i]()
+            end
+        end, self.tickRate)
     end
 
     return self.key
