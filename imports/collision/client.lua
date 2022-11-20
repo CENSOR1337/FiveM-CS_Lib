@@ -95,13 +95,18 @@ function self.createSphere(options)
 		if (self.bOnlyRelevant) then
 			local count = 0
 			for _, entity in pairs(self:getRelevantEntities()) do
-				count += 1
-				entities[count] = entity
+				if (DoesEntityExist(entity)) then
+					count += 1
+					entities[count] = entity
+				end
 			end
 
 			for _, playerId in pairs(self:getRelevantPlayers()) do
-				count += 1
-				entities[count] = GetPlayerPed(playerId)
+				local entity = GetPlayerPed(playerId)
+				if (DoesEntityExist(entity)) then
+					count += 1
+					entities[count] = entity
+				end
 			end
 		else
 			entities = cslib.game.getEntitiesByTypes(self.poolTypes)
@@ -109,49 +114,42 @@ function self.createSphere(options)
 		for i = 1, #entities, 1 do
 			local entityId = entities[i]
 			local entity = self.overlapping[entityId] or { id = entityId }
-			local bEntityExists = DoesEntityExist(entity.id)
 
-			if not (bEntityExists) then
-				self.overlapping[entity.id] = nil
-				print(entity.id, "no longer exists")
-			end
 
-			if (bEntityExists) then
-				entity.coords = GetEntityCoords(entity.id)
-				local bInside = self:isPointInside(entity.coords)
+			entity.coords = GetEntityCoords(entity.id)
+			local bInside = self:isPointInside(entity.coords)
 
-				if (bInside) then
-					if not (self.overlapping[entity.id]) then
-						if (self.onBeginOverlap) then
-							self:onBeginOverlap(entity)
-						end
-
-						if (self.onOverlapping) then
-							entity.interval = self.tickpool:onTick(function()
-								local interval = entity.interval
-								entity.interval = nil
-								self:onOverlapping(entity)
-								entity.interval = interval
-							end)
-						end
+			if (bInside) then
+				if not (self.overlapping[entity.id]) then
+					if (self.onBeginOverlap) then
+						self:onBeginOverlap(entity)
 					end
-				else
-					if (self.overlapping[entity.id]) then
-						if (self.onOverlapping) then
-							if (entity.interval) then
-								self.tickpool:clearOnTick(entity.interval)
-								entity.interval = nil
-							end
-						end
 
-						if (self.onEndOverlap) then
-							self:onEndOverlap(entity)
-						end
+					if (self.onOverlapping) then
+						entity.interval = self.tickpool:onTick(function()
+							local interval = entity.interval
+							entity.interval = nil
+							self:onOverlapping(entity)
+							entity.interval = interval
+						end)
 					end
 				end
+			else
+				if (self.overlapping[entity.id]) then
+					if (self.onOverlapping) then
+						if (entity.interval) then
+							self.tickpool:clearOnTick(entity.interval)
+							entity.interval = nil
+						end
+					end
 
-				self.overlapping[entityId] = bInside and entity or nil
+					if (self.onEndOverlap) then
+						self:onEndOverlap(entity)
+					end
+				end
 			end
+
+			self.overlapping[entityId] = bInside and entity or nil
 		end
 	end, self.tickRate)
 
