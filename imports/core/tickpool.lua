@@ -51,7 +51,14 @@ function tickpool:clearOnTick(key)
     self.bReassignTable = true
 end
 
-self.tickpool = tickpool.new
+self.tickpool = setmetatable({
+    new = tickpool.new,
+}, {
+    __call = function(_, ...)
+        return tickpool.new(...)
+    end
+})
+
 -- [[ Base Tick Pool ]] --
 local baseTickPool = nil
 function self.onTick(fnHandler)
