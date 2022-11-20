@@ -1,24 +1,25 @@
 local interval = {}
 interval.__index = interval
 local Wait = Wait
+local CitizenCreateThreadNow = Citizen.CreateThreadNow
 
 function interval.new(handler, delay, options)
     local self = {}
-    self.handler = handler
     self.delay = delay or 0
     self.bDestroyed = false
     self.bLoop = (options.bLoop ~= nil) and options.bLoop or false
-    Citizen.CreateThreadNow(function(ref)
+    self.handler = function()
+        if (self.bDestroyed) then return end
+        Wait(self.delay)
+        handler()
+    end
+    CitizenCreateThreadNow(function(ref)
         self.id = ref
         if (self.bLoop) then
             while not (self.bDestroyed) do
-                Wait(self.delay)
-                if (self.bDestroyed) then break end
                 self.handler()
             end
         else
-            Wait(self.delay)
-            if (self.bDestroyed) then return end
             self.handler()
         end
     end)
