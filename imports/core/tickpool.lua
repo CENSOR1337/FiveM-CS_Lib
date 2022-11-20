@@ -50,7 +50,7 @@ function tickpool:onTick(fnHandler)
 end
 
 function tickpool:clearOnTick(key)
-    self.handlers[key] = nil
+    self.handlers.fn[key] = nil
     self.bReassignTable = true
 end
 
