@@ -108,6 +108,16 @@ function collisionSphere.new(options)
     self.tickpool = cslib.tickpool.new()
 
     self.interval = cslib.setInterval(function()
+        for key, entity in pairs(self.overlapping) do
+            if (DoesEntityExist(entity.id)) then
+                if (entity.interval) then
+                    self.tickpool:clearOnTick(entity.interval)
+                    entity.interval = nil
+                end
+                self.overlapping[key] = nil
+            end
+        end
+
         local entities = {}
         if (self.bOnlyRelevant) then
             local count = 0
@@ -166,7 +176,7 @@ function collisionSphere.new(options)
                 end
             end
 
-            self.overlapping[entityId] = bInside and entity or nil
+            self.overlapping[entity.id] = bInside and entity or nil
         end
     end, self.tickRate)
 
