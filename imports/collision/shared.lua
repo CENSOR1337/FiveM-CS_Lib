@@ -32,10 +32,12 @@ function collisionBase:destroy()
         self.debugInterval = nil
     end
 
-    for _, entity in pairs(self.overlapping) do
-        if (entity.interval) then
-            cslib.clearInterval(entity.interval)
-            entity.interval = nil
+    if (self.tickpool) then
+        for _, entity in pairs(self.overlapping) do
+            if (entity.interval) then
+                self.tickpool:clearOnTick(entity.interval)
+                entity.interval = nil
+            end
         end
     end
 end
