@@ -109,7 +109,7 @@ function collisionSphere.new(options)
 
     self.interval = cslib.setInterval(function()
         for key, entity in pairs(self.overlapping) do
-            if (DoesEntityExist(entity.id)) then
+            if not (DoesEntityExist(entity.id)) then
                 if (entity.interval) then
                     self.tickpool:clearOnTick(entity.interval)
                     entity.interval = nil
