@@ -21,6 +21,25 @@ function collisionBase.new(options)
     return self
 end
 
+function collisionBase:destroy()
+    if (self.interval) then
+        cslib.clearInterval(self.interval)
+        self.interval = nil
+    end
+
+    if (self.debugInterval) then
+        cslib.clearInterval(self.debugInterval)
+        self.debugInterval = nil
+    end
+
+    for _, entity in pairs(self.overlapping) do
+        if (entity.interval) then
+            cslib.clearInterval(entity.interval)
+            entity.interval = nil
+        end
+    end
+end
+
 function collisionBase:addRelevantEntity(entity)
     if not (DoesEntityExist(entity)) then return end
     if (self:isEntityRelevant(entity)) then return end
@@ -44,18 +63,18 @@ function collisionBase:getRelevantEntities()
     return self.relevant.entities
 end
 
-function collisionBase:addRelevantPlayer(playerId)
-    if (self:isPlayerRelevant(playerId)) then return end
-    self.relevant.players[playerId] = playerId
+function collisionBase:addRelevantPlayer(src)
+    if (self:isPlayerRelevant(src)) then return end
+    self.relevant.players[src] = src
 end
 
-function collisionBase:removeRelevantPlayer(player)
-    if not (self:isPlayerRelevant(player)) then return end
-    self.relevant.players[player] = nil
+function collisionBase:removeRelevantPlayer(src)
+    if not (self:isPlayerRelevant(src)) then return end
+    self.relevant.players[src] = nil
 end
 
-function collisionBase:isPlayerRelevant(player)
-    return self.relevant.players[player] ~= nil
+function collisionBase:isPlayerRelevant(src)
+    return self.relevant.players[src] ~= nil
 end
 
 function collisionBase:clearRelevantPlayers()
@@ -99,7 +118,8 @@ function collisionSphere.new(options)
                 end
             end
 
-            for _, playerId in pairs(self:getRelevantPlayers()) do
+            for _, src in pairs(self:getRelevantPlayers()) do
+                local playerId = bServer and src or GetPlayerServerId(src)
                 local entity = GetPlayerPed(playerId)
                 if (DoesEntityExist(entity)) then
                     count += 1
@@ -165,20 +185,6 @@ self.sphere = setmetatable({
     end
 })
 
-function collisionSphere:destroy()
-    if (self.interval) then
-        cslib.clearInterval(self.interval)
-        self.interval = nil
-    end
-
-    for _, entity in pairs(self.overlapping) do
-        if (entity.interval) then
-            cslib.clearInterval(entity.interval)
-            entity.interval = nil
-        end
-    end
-end
-
 function collisionSphere:isPointInside(coords)
     local distance = #(vec(coords.x, coords.y, coords.z) - self.position)
     return (distance <= self.radius)
@@ -186,7 +192,7 @@ end
 
 if not (bServer) then
     function collisionSphere:debugThread()
-        cslib.setInterval(function()
+        self.debugInterval = cslib.setInterval(function()
             DrawMarker(28, self.position.x, self.position.y, self.position.z, 0, 0, 0, 0, 0, 0, self.radius, self.radius, self.radius, self.color.r, self.color.g, self.color.b, self.color.a, false, false, 0, false, nil, nil, false)
         end, 0)
     end

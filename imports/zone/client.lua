@@ -6,7 +6,7 @@ self.sphere = setmetatable({
             bDebug = options.bDebug,
             bOnlyRelevant = true
         })
-        collision:addRelevantPlayer(PlayerId())
+        collision:addRelevantPlayer(GetPlayerServerId(PlayerId()))
         return collision
     end
 }, {
