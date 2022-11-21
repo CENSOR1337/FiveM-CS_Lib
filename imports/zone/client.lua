@@ -1,6 +1,6 @@
 self.sphere = setmetatable({
     new = function(coords, radius, options)
-        local collision = cslib.collision.createSphere({
+        local collision = cslib.collision.sphere({
             position = vec(coords.x, coords.y, coords.z),
             radius = radius,
             bDebug = options.bDebug,
