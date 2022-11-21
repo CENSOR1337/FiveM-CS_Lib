@@ -47,28 +47,6 @@ function self.getEntities()
     return self.getEntitiesByTypes({ "CObject", "CPed", "CVehicle" })
 end
 
---[[ function self.getEntities()
-    local objects = self.getObjects()
-    local peds = self.getPeds()
-    local vehicles = self.getVehicles()
-    local entities = {}
-    local count = 0
-    for i = 1, #objects, 1 do
-        entities[count] = objects[i]
-        count += 1
-    end
-    for i = 1, #peds, 1 do
-        entities[count] = peds[i]
-        count += 1
-    end
-    for i = 1, #vehicles, 1 do
-        entities[count] = vehicles[i]
-        count += 1
-    end
-
-    return entities
-end ]]
-
 
 function self.drawText2d(data)
     local text = data.text
