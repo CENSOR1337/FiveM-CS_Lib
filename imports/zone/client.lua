@@ -7,7 +7,7 @@ self.sphere = setmetatable({
             bOnlyRelevant = true
         })
         collision:addRelevantPlayer(PlayerId())
-        return sphere
+        return collision
     end
 }, {
     __call = function(t, ...)
