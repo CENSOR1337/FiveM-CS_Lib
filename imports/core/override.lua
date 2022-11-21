@@ -2,6 +2,7 @@ local RemoveEventHandler = RemoveEventHandler
 local AddEventHandler = AddEventHandler
 local RegisterNetEvent = RegisterNetEvent
 
+self.bIsServer = IsDuplicityVersion()
 self.on = AddEventHandler
 
 if (IsDuplicityVersion()) then

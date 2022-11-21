@@ -30,23 +30,20 @@ function self.getVehicles()
     return self.getGamePool("CVehicle")
 end
 
-function self.getEntitiesByTypes(types)
-    local entities = {}
+function self.getPlayers()
+    local activePlayers = GetActivePlayers()
+    local players = {}
     local count = 0
-    for i = 1, #types, 1 do
-        local pool = _in(0x2b9d4f50, types[i], _ro)
-        for i = 1, #pool, 1 do
-            count += 1
-            entities[count] = pool[i]
-        end
+    for i = 1, #activePlayers, 1 do
+        count += 1
+        players[count] = GetPlayerServerId(activePlayers[i])
     end
-    return entities
+    return players
 end
 
 function self.getEntities()
     return self.getEntitiesByTypes({ "CObject", "CPed", "CVehicle" })
 end
-
 
 function self.drawText2d(data)
     local text = data.text
