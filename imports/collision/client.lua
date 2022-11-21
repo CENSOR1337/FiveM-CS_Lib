@@ -74,11 +74,11 @@ function collisionBase:clearRelevant()
 end
 
 --[[ Sphere ]]
-collisionSphere = {}
+local collisionSphere = {}
 collisionSphere.__index = collisionSphere
 setmetatable(collisionSphere, collisionBase)
 
-function self.createSphere(options)
+function collisionSphere.new(options)
 	if not (options.radius) then return end
 	if (options.coords) then
 		options.position = options.coords
@@ -159,6 +159,14 @@ function self.createSphere(options)
 
 	return self
 end
+
+self.sphere = setmetatable({
+	new = collisionSphere.new,
+}, {
+	__call = function(t, ...)
+		return t.new(...)
+	end
+})
 
 function collisionSphere:destroy()
 	if (self.interval) then
