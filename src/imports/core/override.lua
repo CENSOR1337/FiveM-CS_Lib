@@ -4,6 +4,7 @@ local RegisterNetEvent = RegisterNetEvent
 
 self.bIsServer = IsDuplicityVersion()
 self.on = AddEventHandler
+self.onNet = RegisterNetEvent
 
 if (IsDuplicityVersion()) then
     self.onClient = RegisterNetEvent
