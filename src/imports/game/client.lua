@@ -49,7 +49,7 @@ function self.drawText2d(data)
     local text = data.text
     if not (text) then return end
     local offset = data.offset or vec(0.5, 0.5)
-    local scale = data.size or 1.0
+    local scale = data.scale or 1.0
     local font = data.font or 0
     local color = data.color or { r = 255, g = 255, b = 255, a = 255 }
     local bOutline = data.bOutline or false
@@ -86,7 +86,7 @@ function self.drawText3d(data)
     if not (coords) then return end
     coords = vec(coords.x, coords.y, coords.z)
 
-    local size = data.size or 1.0
+    local scale = data.scale or 1.0
     local font = data.font or 0
     local color = data.color or { r = 255, g = 255, b = 255, a = 255 }
     local bOutline = data.bOutline or false
@@ -94,7 +94,7 @@ function self.drawText3d(data)
     local bShadow = data.bShadow or false
 
     local camDistance = #(coords - GetFinalRenderedCamCoord())
-    local scale = (size / camDistance) * 2
+    scale = (scale / camDistance) * 2
     local fov = (1 / GetGameplayCamFov()) * 100
     scale = scale * fov
 
