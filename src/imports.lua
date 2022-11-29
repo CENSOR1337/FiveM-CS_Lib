@@ -29,7 +29,7 @@ local function initCoreComponent()
     return load(coreSource)()
 end
 
-_ENV.__cslib_core = setmetatable(initCoreComponent(), {
+local cslib = setmetatable({}, {
     __index = function(t, k)
         local source = ""
         local shared = LoadResourceFile(resourceName, ("imports/%s/shared.lua"):format(k))
@@ -47,4 +47,8 @@ _ENV.__cslib_core = setmetatable(initCoreComponent(), {
     end
 })
 
-_ENV.cslib = _ENV.__cslib_core
+rawset(_ENV, "cslib", cslib)
+
+for key, value in pairs(initCoreComponent()) do
+    rawset(cslib, key, value)
+end
