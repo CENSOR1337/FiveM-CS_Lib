@@ -1,0 +1,11 @@
+{
+  "name": "cs_lib",
+  "scripts": {
+    "watch": "node ./scripts/build.js"
+  },
+  "author": "CENSOR_1337",
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "fs-extra": "^11.0.0"
+  }
+}

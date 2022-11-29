@@ -1,0 +1,11 @@
+{
+    "output": "",
+    "name": "cs_lib",
+    "works": [
+        {
+            "action": "copy_folder",
+            "output": "./",
+            "source": "./src/"
+        }
+    ]
+}
