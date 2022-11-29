@@ -1,6 +1,5 @@
 local GetEntityCoords = GetEntityCoords
 local DoesEntityExist = DoesEntityExist
-local bServer = IsDuplicityVersion()
 
 local collisionBase = {}
 collisionBase.__index = collisionBase
@@ -131,7 +130,7 @@ function collisionSphere.new(options)
             end
 
             for _, src in pairs(self:getRelevantPlayers()) do
-                local playerId = bServer and src or GetPlayerServerId(src)
+                local playerId = cslib.bIsServer and src or GetPlayerFromServerId(src)
                 local entity = GetPlayerPed(playerId)
                 if (DoesEntityExist(entity)) then
                     count += 1
