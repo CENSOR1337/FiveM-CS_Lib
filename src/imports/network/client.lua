@@ -1,6 +1,7 @@
 local table_unpack = table.unpack
 
 function self.triggerServerCallback(eventname, listener, ...)
+    if not (listener) then error("listener for server callback is nil") end
     local callbackId = cslib.utils.randomString(16)
     local cbEventName = "cslib:serverCallbacks:" .. eventname
     cslib.onceNet(cbEventName .. callbackId, listener)
