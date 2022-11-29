@@ -1,9 +1,9 @@
-const watcher = require('chokidar').watch;
+const Chokidar = require('chokidar');
 const fse = require('fs-extra');
 const buildConfig = JSON.parse(fse.readFileSync('./build-config.json', 'utf8'));
 buildConfig.output = `${buildConfig.output}${buildConfig.name}/`;
 
-let build = () => {
+function buildResource() {
     fse.removeSync(buildConfig.output, err => {
         if (err) return console.error(err)
         console.log(`${path} removed!`);
@@ -22,8 +22,8 @@ let build = () => {
     console.log("Build complete!");
 }
 
-watcher('./src/').on('change', async (event, path) => {
-    build();
+Chokidar.watch('./src/').on('change', async (event, path) => {
+    buildResource();
 });
 
-build();
+buildResource();
