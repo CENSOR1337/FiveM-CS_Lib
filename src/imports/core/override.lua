@@ -6,10 +6,11 @@ self.bIsServer = IsDuplicityVersion()
 self.on = AddEventHandler
 self.onNet = RegisterNetEvent
 
-if (IsDuplicityVersion()) then
-    self.onClient = RegisterNetEvent
+if not (self.bIsServer) then
+    self.triggerServerCallback = cslib.network.triggerServerCallback
+    self.triggerServerCallbackAsync = cslib.network.triggerServerCallbackAsync
 else
-    self.onServer = RegisterNetEvent
+    self.registerServerCallback = cslib.network.registerServerCallback
 end
 
 ---@param eventname string
