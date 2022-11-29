@@ -201,6 +201,10 @@ function collisionSphere:isPointInside(coords)
     return (distance <= self.radius)
 end
 
+function collisionSphere:isEntityInside(entity)
+    return self:isPointInside(GetEntityCoords(entity))
+end
+
 if not (bServer) then
     function collisionSphere:debugThread()
         self.debugInterval = cslib.setInterval(function()
