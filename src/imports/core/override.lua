@@ -5,6 +5,7 @@ local RegisterNetEvent = RegisterNetEvent
 self.bIsServer = IsDuplicityVersion()
 self.on = AddEventHandler
 self.onNet = RegisterNetEvent
+self.off = RemoveEventHandler
 
 if not (self.bIsServer) then
     self.triggerServerCallback = cslib.network.triggerServerCallback
