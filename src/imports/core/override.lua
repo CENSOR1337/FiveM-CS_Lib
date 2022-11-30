@@ -1,7 +1,3 @@
-local RemoveEventHandler = RemoveEventHandler
-local AddEventHandler = AddEventHandler
-local RegisterNetEvent = RegisterNetEvent
-
 self.bIsServer = IsDuplicityVersion()
 self.on = AddEventHandler
 self.onNet = RegisterNetEvent
@@ -27,7 +23,7 @@ function self.once(eventname, listener)
     local eventData
     eventData = AddEventHandler(eventname, function(...)
         listener(...)
-        RemoveEventHandler(eventData)
+        self.off(eventData)
     end)
     return eventData
 end
@@ -39,7 +35,7 @@ function self.onceNet(eventname, listener)
     local eventData
     eventData = RegisterNetEvent(eventname, function(...)
         listener(...)
-        RemoveEventHandler(eventData)
+        self.off(eventData)
     end)
     return eventData
 end
