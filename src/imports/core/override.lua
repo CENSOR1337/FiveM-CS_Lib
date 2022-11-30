@@ -8,7 +8,7 @@ self.onNet = RegisterNetEvent
 
 if not (self.bIsServer) then
     self.triggerServerCallback = cslib.network.triggerServerCallback
-    self.triggerServerCallbackAsync = cslib.network.triggerServerCallbackAsync
+    self.triggerServerCallbackSync = cslib.network.triggerServerCallbackSync
 else
     self.registerServerCallback = cslib.network.registerServerCallback
 end

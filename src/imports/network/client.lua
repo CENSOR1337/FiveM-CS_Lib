@@ -8,7 +8,7 @@ function self.triggerServerCallback(eventname, listener, ...)
     TriggerServerEvent(cbEventName, callbackId, ...)
 end
 
-function self.triggerServerCallbackAsync(eventname, ...)
+function self.triggerServerCallbackSync(eventname, ...)
     local function handler(...)
         local p = promise.new()
         self.triggerServerCallback(eventname, function(...)
