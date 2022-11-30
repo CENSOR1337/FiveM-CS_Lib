@@ -6,12 +6,18 @@ self.bIsServer = IsDuplicityVersion()
 self.on = AddEventHandler
 self.onNet = RegisterNetEvent
 self.off = RemoveEventHandler
+self.emit = TriggerEvent
 
-if not (self.bIsServer) then
+if (self.bIsServer) then
+    self.registerServerCallback = cslib.network.registerServerCallback
+    self.emitClient = TriggerClientEvent
+    self.emitAllClients = function(eventname, ...)
+        self.emitClient(eventname, -1, ...)
+    end
+else
     self.triggerServerCallback = cslib.network.triggerServerCallback
     self.triggerServerCallbackSync = cslib.network.triggerServerCallbackSync
-else
-    self.registerServerCallback = cslib.network.registerServerCallback
+    self.emitServer = TriggerServerEvent
 end
 
 ---@param eventname string
