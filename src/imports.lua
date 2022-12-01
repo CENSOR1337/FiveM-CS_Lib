@@ -31,17 +31,19 @@ end
 
 local cslib = setmetatable({}, {
     __index = function(t, k)
-        local source = ""
+        local chunk = LoadResourceFile(resourceName, ("imports/%s/%s.lua"):format(k, bServer and "server" or "client"))
         local shared = LoadResourceFile(resourceName, ("imports/%s/shared.lua"):format(k))
-        if (bServer) then
-            source = LoadResourceFile(resourceName, ("imports/%s/server.lua"):format(k))
-        else
-            source = LoadResourceFile(resourceName, ("imports/%s/client.lua"):format(k))
+        if (shared == nil and chunk == nil) then
+            error(("^1[ Module \"%s\" not found ]^0"):format(k), 2)
         end
-        if (shared == nil and source == nil) then error(("^1[ Module \"%s\" not found ]^0"):format(k), 2) end
-        source = ("local self = {}\n%s\n%s\nreturn self"):format(shared or "", source or "")
-        local f, err = load(source)
-        if not (f) or (err) then error(("^1[ Module \"%s\" failed to load ]^0"):format(k), 2) end
+
+        chunk = ("local self = {}\n%s\n%s\nreturn self"):format(shared or "", chunk or "")
+
+        local f, err = load(chunk, ("@@%s/%s"):format(resourceName, k))
+        if not (f) or (err) then
+            error(("^1[ Module \"%s\" failed to load ]^0"):format(k), 2)
+        end
+
         rawset(t, k, f())
         return rawget(t, k)
     end
