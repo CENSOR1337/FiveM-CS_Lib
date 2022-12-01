@@ -203,7 +203,7 @@ function collisionSphere:isEntityInside(entity)
     return self:isPointInside(GetEntityCoords(entity))
 end
 
-if not (bServer) then
+if not (cslib.bIsServer) then
     function collisionSphere:debugThread()
         self.debugInterval = cslib.setInterval(function()
             DrawMarker(28, self.position.x, self.position.y, self.position.z, 0, 0, 0, 0, 0, 0, self.radius, self.radius, self.radius, self.color.r, self.color.g, self.color.b, self.color.a, false, false, 0, false, nil, nil, false)
