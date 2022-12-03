@@ -110,12 +110,7 @@ function collisionBase:destroy()
     end
 
     if (self.tickpool) then
-        for _, entity in pairs(self.overlapping) do
-            if (entity.interval) then
-                self.tickpool:clearOnTick(entity.interval)
-                entity.interval = nil
-            end
-        end
+        self.tickpool:destroy()
     end
 end
 
