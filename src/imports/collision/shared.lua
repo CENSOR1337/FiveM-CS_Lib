@@ -65,10 +65,10 @@ function collisionBase.new(self, class, options)
 
                     if (self.onOverlapping) then
                         entity.interval = self.tickpool:onTick(function()
-                            local interval = entity.interval
-                            entity.interval = nil
-                            self:onOverlapping(entity)
-                            entity.interval = interval
+                            local entityPara = {}
+                            entityPara.id = entity.id
+                            entityPara.coords = entity.coords
+                            self:onOverlapping(entityPara)
                         end)
                     end
                 end
