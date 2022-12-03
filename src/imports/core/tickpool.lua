@@ -46,6 +46,13 @@ function tickpool:onTick(fnHandler)
     return self.key
 end
 
+function tickpool:destroy()
+    if (self.interval) then
+        self.interval:destroy()
+        self.interval = nil
+    end
+end
+
 function tickpool:clearOnTick(key)
     self.handlers.fn[key] = nil
     self.bReassignTable = true
