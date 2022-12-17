@@ -75,7 +75,7 @@ function collisionBase.new(self, class, options)
             else
                 if (self.overlapping[entity.id]) then
                     if (self.onOverlapping) then
-                        if (entity.interval) then
+                        if (self.tickpool and entity.interval) then
                             self.tickpool:clearOnTick(entity.interval)
                             entity.interval = nil
                         end
