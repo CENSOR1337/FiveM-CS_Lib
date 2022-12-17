@@ -100,17 +100,18 @@ end
 
 function collisionBase:destroy()
     if (self.interval) then
-        cslib.clearInterval(self.interval)
+        self.interval:destroy()
         self.interval = nil
     end
 
     if (self.debugInterval) then
-        cslib.clearInterval(self.debugInterval)
+        self.debugInterval:destroy()
         self.debugInterval = nil
     end
 
     if (self.tickpool) then
         self.tickpool:destroy()
+        self.tickpool = nil
     end
 end
 
