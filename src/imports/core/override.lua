@@ -22,8 +22,8 @@ end
 function self.once(eventname, listener)
     local eventData
     eventData = AddEventHandler(eventname, function(...)
-        listener(...)
         self.off(eventData)
+        listener(...)
     end)
     return eventData
 end
@@ -34,8 +34,8 @@ end
 function self.onceNet(eventname, listener)
     local eventData
     eventData = RegisterNetEvent(eventname, function(...)
-        listener(...)
         self.off(eventData)
+        listener(...)
     end)
     return eventData
 end
