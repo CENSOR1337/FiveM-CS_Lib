@@ -16,26 +16,26 @@ else
     self.emitServer = TriggerServerEvent
 end
 
+local function bindOnce(bIsNet, eventname, listener)
+    local event
+    local fn = function(...)
+        self.off(event)
+        listener(...)
+    end
+    event = bIsNet and RegisterNetEvent(eventname, fn) or AddEventHandler(eventname, fn)
+    return event
+end
+
 ---@param eventname string
 ---@param listener function
 ---@return { key: number, name : string}
 function self.once(eventname, listener)
-    local eventData
-    eventData = AddEventHandler(eventname, function(...)
-        self.off(eventData)
-        listener(...)
-    end)
-    return eventData
+    return bindOnce(false, eventname, listener)
 end
 
 ---@param eventname string
 ---@param listener function
 ---@return { key: number, name : string}?
 function self.onceNet(eventname, listener)
-    local eventData
-    eventData = RegisterNetEvent(eventname, function(...)
-        self.off(eventData)
-        listener(...)
-    end)
-    return eventData
+    return bindOnce(true, eventname, listener)
 end
