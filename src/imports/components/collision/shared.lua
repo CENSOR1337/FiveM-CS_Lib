@@ -17,8 +17,8 @@ function collisionBase.new(self, class, options)
         players = {}
     }
     self.overlapping = {}
-    self.tickpool = cslib.tickpool.new()
-    self.interval = cslib.setInterval(function()
+    self.tickpool = lib.tickpool.new()
+    self.interval = lib.setInterval(function()
         for key, entity in pairs(self.overlapping) do
             if not (DoesEntityExist(entity.id)) then
                 if (entity.interval) then
@@ -40,7 +40,7 @@ function collisionBase.new(self, class, options)
             end
 
             for _, src in pairs(self:getRelevantPlayers()) do
-                local playerId = cslib.bIsServer and src or GetPlayerFromServerId(src)
+                local playerId = lib.bIsServer and src or GetPlayerFromServerId(src)
                 local entity = GetPlayerPed(playerId)
                 if (DoesEntityExist(entity)) then
                     count += 1
@@ -48,7 +48,7 @@ function collisionBase.new(self, class, options)
                 end
             end
         else
-            entities = cslib.game.getEntitiesByTypes(self.poolTypes)
+            entities = lib.game.getEntitiesByTypes(self.poolTypes)
         end
         for i = 1, #entities, 1 do
             local entityId = entities[i]
@@ -182,14 +182,6 @@ function collisionSphere.new(coords, radius, options)
     return collisionBase.new(self, collisionSphere, options)
 end
 
-self.sphere = setmetatable({
-    new = collisionSphere.new,
-}, {
-    __call = function(t, ...)
-        return t.new(...)
-    end
-})
-
 function collisionSphere:isPointInside(coords)
     local distance = #(vec(coords.x, coords.y, coords.z) - self.position)
     return (distance <= self.radius)
@@ -199,10 +191,11 @@ function collisionSphere:isEntityInside(entity)
     return self:isPointInside(GetEntityCoords(entity))
 end
 
-if not (cslib.bIsServer) then
+if not (lib.bIsServer) then
     function collisionSphere:debugThread()
-        self.debugInterval = cslib.setInterval(function()
-            DrawMarker(28, self.position.x, self.position.y, self.position.z, 0, 0, 0, 0, 0, 0, self.radius, self.radius, self.radius, self.color.r, self.color.g, self.color.b, self.color.a, false, false, 0, false, nil, nil, false)
+        local fRadius = self.radius + 0.0
+        self.debugInterval = lib.setInterval(function()
+            DrawMarker(28, self.position.x, self.position.y, self.position.z, 0, 0, 0, 0, 0, 0, fRadius, fRadius, fRadius, self.color.r, self.color.g, self.color.b, self.color.a, false, false, 0, false, nil, nil, false)
         end, 0)
     end
 end
@@ -214,3 +207,14 @@ end
 function collisionSphere:setRadius(radius)
     self.radius = radius + 0.0
 end
+
+return {
+    collisionBase = collisionBase,
+    sphere        = setmetatable({
+        new = collisionSphere.new,
+    }, {
+        __call = function(t, ...)
+            return t.new(...)
+        end
+    })
+}

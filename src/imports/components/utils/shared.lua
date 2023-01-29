@@ -20,13 +20,18 @@ do
     Charset.lower.len = #Charset.lower.chars
 end
 
-function self.randomString(length, options)
+local randomString
+randomString = function(length, options)
     if (length > 0) then
         options = options or { "lower", "upper", "numeric" }
         options.op_len = options.op_len or #options
         local charType = options[math_random(1, options.op_len)]
         local randomChar = Charset[charType].chars[math_random(1, Charset[charType].len)]
-        return randomChar .. self.randomString(length - 1, options)
+        return randomChar .. randomString(length - 1, options)
     end
     return ""
 end
+
+return {
+    randomString = randomString,
+}

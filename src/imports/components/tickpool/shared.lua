@@ -24,7 +24,7 @@ function tickpool:onTick(fnHandler)
     self.bReassignTable = true
 
     if not (self.interval) then
-        self.interval = cslib.setInterval(function()
+        self.interval = lib.setInterval(function()
             local listEntries = self.handlers.list
             if (self.bReassignTable) then
                 table.wipe(listEntries)
@@ -58,24 +58,10 @@ function tickpool:clearOnTick(key)
     self.bReassignTable = true
 end
 
-self.tickpool = setmetatable({
+return setmetatable({
     new = tickpool.new,
 }, {
     __call = function(_, ...)
         return tickpool.new(...)
     end
 })
-
--- [[ Base Tick Pool ]] --
-local baseTickPool = nil
-function self.onTick(fnHandler)
-    if not (baseTickPool) then
-        baseTickPool = tickpool.new()
-    end
-    return baseTickPool:onTick(fnHandler)
-end
-
-function self.clearOnTick(key)
-    if not (baseTickPool) then return end
-    baseTickPool:clearOnTick(key)
-end

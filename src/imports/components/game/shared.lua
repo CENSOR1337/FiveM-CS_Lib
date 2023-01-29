@@ -1,4 +1,4 @@
-function self.getEntitiesByTypes(types)
+local function getEntitiesByTypes(types)
     local entities = {}
     local count = 0
 
@@ -7,19 +7,19 @@ function self.getEntitiesByTypes(types)
         local pool = {}
 
         if (poolType == "CObject") then
-            pool = self.getObjects()
+            pool = lib.game.getObjects()
         end
 
         if (poolType == "CPed") then
-            pool = self.getPeds()
+            pool = lib.game.getPeds()
         end
 
         if (poolType == "CVehicle") then
-            pool = self.getVehicles()
+            pool = lib.game.getVehicles()
         end
 
         if (poolType == "CPlayerPed") then
-            pool = self.getPlayerPeds()
+            pool = lib.game.getPlayerPeds()
         end
 
         for i = 1, #pool, 1 do
@@ -31,8 +31,8 @@ function self.getEntitiesByTypes(types)
     return entities
 end
 
-function self.getPlayerPeds()
-    local players = cslib.bIsServer and self.getPlayers() or GetActivePlayers()
+local function getPlayerPeds()
+    local players = lib.bIsServer and lib.game.getPlayers() or GetActivePlayers()
     local peds = {}
     local count = 0
     for i = 1, #players, 1 do
@@ -44,3 +44,11 @@ function self.getPlayerPeds()
     end
     return peds
 end
+
+return {
+    getPlayerPeds = getPlayerPeds,
+    getEntities = function()
+        return getEntitiesByTypes({ "CObject", "CPed", "CVehicle" })
+    end,
+    getEntitiesByTypes = getEntitiesByTypes,
+}

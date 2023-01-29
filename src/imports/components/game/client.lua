@@ -1,36 +1,19 @@
-local _i, _f, _v, _r, _ri, _rf, _rl, _s, _rv, _ro, _in, _ii, _fi = Citizen.PointerValueInt(), Citizen.PointerValueFloat(), Citizen.PointerValueVector(), Citizen.ReturnResultAnyway(), Citizen.ResultAsInteger(), Citizen.ResultAsFloat(), Citizen.ResultAsLong(), Citizen.ResultAsString(), Citizen.ResultAsVector(), Citizen.ResultAsObject2(msgpack.unpack), Citizen.InvokeNative, Citizen.PointerValueIntInitialized, Citizen.PointerValueFloatInitialized
-
-local tostring = tostring
-local function _ts(num)
-    if num == 0 or not num then
-        return nil
-    end
-    return tostring(num)
-end
-
 local GetActivePlayers = GetActivePlayers
+local GetGamePool = GetGamePool
 
-function self.getPlayers()
-    return GetActivePlayers()
+local function getObjects()
+    return GetGamePool("CObject")
 end
 
-function self.getGamePool(poolName)
-    return _in(0x2b9d4f50, poolName, _ro)
+local function getPeds()
+    return GetGamePool("CPed")
 end
 
-function self.getObjects()
-    return self.getGamePool("CObject")
+local function getVehicles()
+    return GetGamePool("CVehicle")
 end
 
-function self.getPeds()
-    return self.getGamePool("CPed")
-end
-
-function self.getVehicles()
-    return self.getGamePool("CVehicle")
-end
-
-function self.getPlayers()
+local function getPlayers()
     local activePlayers = GetActivePlayers()
     local players = {}
     local count = 0
@@ -41,11 +24,7 @@ function self.getPlayers()
     return players
 end
 
-function self.getEntities()
-    return self.getEntitiesByTypes({ "CObject", "CPed", "CVehicle" })
-end
-
-function self.drawText2d(data)
+local function drawText2d(data)
     local text = data.text
     if not (text) then return end
     local offset = data.offset or vec(0.5, 0.5)
@@ -79,7 +58,7 @@ function self.drawText2d(data)
 
 end
 
-function self.drawText3d(data)
+local function drawText3d(data)
     local text = data.text
     if not (text) then return end
     local coords = data.coords
@@ -117,3 +96,12 @@ function self.drawText3d(data)
     EndTextCommandDisplayText(0.0, 0.0)
     ClearDrawOrigin()
 end
+
+return {
+    getPlayers = getPlayers,
+    getObjects = getObjects,
+    getPeds = getPeds,
+    getVehicles = getVehicles,
+    drawText2d = drawText2d,
+    drawText3d = drawText3d,
+}
