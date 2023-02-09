@@ -53,7 +53,7 @@ lib.emitServer = not isServer and TriggerServerEvent
 local baseTickPool
 lib.onTick = function(fnHandler)
     if not (baseTickPool) then
-        baseTickPool = cslib.tickpool()
+        baseTickPool = lib.tickpool()
     end
     return baseTickPool:onTick(fnHandler)
 end
