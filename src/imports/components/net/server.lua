@@ -1,3 +1,6 @@
+local table_unpack = table.unpack
+local Citizen_Await = Citizen.Await
+
 local function registerServerCallback(eventname, listener)
     local cbEventName = "cslib:svcb:" .. eventname
     return RegisterNetEvent(cbEventName, function(id, ...)
@@ -6,18 +9,19 @@ local function registerServerCallback(eventname, listener)
     end)
 end
 
-local function triggerClientCallback(eventname, listener, ...)
+local function triggerClientCallback(eventname, src, listener, ...)
+    if not (src) then error("source for server callback is nil") end
     if not (listener) then error("listener for server callback is nil") end
     local callbackId = lib.utils.randomString(16)
     local cbEventName = "cslib:clcb:" .. eventname
     lib.onceNet(cbEventName .. callbackId, listener)
-    TriggerClientEvent(cbEventName, callbackId, ...)
+    TriggerClientEvent(cbEventName, src, callbackId, ...)
 end
 
-local function triggerClientCallbackSync(eventname, ...)
+local function triggerClientCallbackSync(eventname, src, ...)
     local function handler(...)
         local p = promise.new()
-        triggerClientCallback(eventname, function(...)
+        triggerClientCallback(eventname, src, function(...)
             p:resolve({ ... })
         end, ...)
         return Citizen_Await(p)

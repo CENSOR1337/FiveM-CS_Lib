@@ -24,8 +24,7 @@ end
 local registerClientCallback = function(eventname, listener)
     local cbEventName = "cslib:clcb:" .. eventname
     return RegisterNetEvent(cbEventName, function(id, ...)
-        local src = source
-        TriggerClientEvent(cbEventName .. id, src, listener(...))
+        TriggerServerEvent(cbEventName .. id, listener(...))
     end)
 end
 
