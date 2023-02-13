@@ -80,13 +80,11 @@ function buildResource() {
         end
     })
 
-    local function loadLib()
-        ${coreSources}
-    end
-
     _ENV.cslib = setmetatable({}, {
         __index = function(self, key)
-            loadLib()
+
+            ${coreSources}
+
             rawset(_ENV, "cslib", lib)
             return lib[key]
         end
