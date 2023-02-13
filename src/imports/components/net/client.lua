@@ -23,5 +23,7 @@ end
 
 return {
     triggerServerCallback = triggerServerCallback,
-    triggerServerCallbackSync = triggerServerCallbackSync
+    triggerServerCallbackSync = triggerServerCallbackSync,
+    callback = triggerServerCallback,
+    callbackSync = triggerServerCallbackSync,
 }

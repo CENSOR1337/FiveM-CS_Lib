@@ -7,5 +7,6 @@ local function registerServerCallback(eventname, listener)
 end
 
 return {
-    registerServerCallback = registerServerCallback
-}
+    registerServerCallback = registerServerCallback,
+    registerCallback = registerServerCallback,
+} 
