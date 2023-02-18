@@ -1,5 +1,4 @@
 local function requestAnimDict(animDict, cb)
-    if HasAnimDictLoaded(animDict) then return animDict end
 
     if type(animDict) ~= "string" then
         error(("animDict expected \"string\" (received %s)"):format(type(animDict)))
