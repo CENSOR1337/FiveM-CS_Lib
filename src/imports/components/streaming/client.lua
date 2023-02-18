@@ -98,15 +98,25 @@ end
 
 return {
     animDict = {
-        request = requestAnimDict,
-        requestSync = requestAnimDictSync,
+        request = setmetatable({
+            await = requestAnimDictSync
+        }, {
+            __call = function(_, ...)
+                return requestAnimDict(...)
+            end
+        }),
         remove = RemoveAnimDict,
         hasLoaded = HasAnimDictLoaded,
         isValid = DoesAnimDictExist
     },
     model = {
-        request = requestModel,
-        requestSync = requestModelSync,
+        request = setmetatable({
+            await = requestModelSync
+        }, {
+            __call = function(_, ...)
+                return requestModel(...)
+            end
+        }),
         remove = SetModelAsNoLongerNeeded,
         hasLoaded = HasModelLoaded,
         isValid = IsModelValid
