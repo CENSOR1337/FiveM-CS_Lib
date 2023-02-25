@@ -21,7 +21,7 @@ function collisionBase.new(self, class, options)
     self.interval = lib.setInterval(function()
         for key, entity in pairs(self.overlapping) do
             if not (DoesEntityExist(entity.id)) then
-                if (entity.interval) then
+                if (self.tickpool and entity.interval) then
                     self.tickpool:clearOnTick(entity.interval)
                     entity.interval = nil
                 end
@@ -63,7 +63,7 @@ function collisionBase.new(self, class, options)
                         self:onBeginOverlap(entity)
                     end
 
-                    if (self.onOverlapping) then
+                    if (self.tickpool and self.onOverlapping) then
                         entity.interval = self.tickpool:onTick(function()
                             local entityPara = {}
                             entityPara.id = entity.id
