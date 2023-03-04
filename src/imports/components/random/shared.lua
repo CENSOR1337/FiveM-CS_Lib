@@ -47,7 +47,8 @@ function chancePool:removeItem(key)
     self:calculateCumulative()
 end
 
-function chancePool:getRandomItem()
+function chancePool:random()
+    if (self.cumulative == 0) then return nil end
     local random = math.random() * self.cumulative
     for _, value in pairs(self.pool) do
         if (random <= value.chanceEnd) then
