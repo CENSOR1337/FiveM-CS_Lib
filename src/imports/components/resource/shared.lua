@@ -3,6 +3,22 @@ local getResourceEventName = function(eventname)
     return resourceName .. ":" .. eventname
 end
 
+local callback = setmetatable({
+    register = function(eventname, listener)
+        eventname = getResourceEventName(eventname)
+        return lib.net.callback.register(eventname, listener)
+    end,
+    await = function(eventname, ...)
+        eventname = getResourceEventName(eventname)
+        return lib.net.callback.await(eventname, ...)
+    end
+}, {
+    __call = function(_, eventname, cb)
+        eventname = getResourceEventName(eventname)
+        return lib.net.callback(eventname, cb)
+    end
+})
+
 return {
     name = resourceName,
     event = setmetatable({}, {
@@ -40,4 +56,5 @@ return {
     emitAllClients = (lib.bIsServer) and function(eventname, ...)
         lib.emitAllClients(getResourceEventName(eventname), -1, ...)
     end,
+    callback = callback
 }
