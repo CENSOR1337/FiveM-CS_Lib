@@ -59,7 +59,7 @@ function tickpool:clearOnTick(key)
 end
 
 return setmetatable({
-    new = tickpool.new,
+    new = tickpool.new
 }, {
     __call = function(_, ...)
         return tickpool.new(...)

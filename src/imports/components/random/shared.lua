@@ -22,11 +22,11 @@ function chancePool:calculateCumulative()
 end
 
 function chancePool:addItem(chance, data)
-    if not(chance) then 
+    if not (chance) then
         error("Chance is required")
     end
 
-    if not(data) then 
+    if not (data) then
         error("Data is required")
     end
 
@@ -40,7 +40,7 @@ function chancePool:addItem(chance, data)
 end
 
 function chancePool:removeItem(key)
-    if not(key) then
+    if not (key) then
         error("Key is required")
     end
     self.pool[key] = nil
