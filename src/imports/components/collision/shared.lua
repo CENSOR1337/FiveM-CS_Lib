@@ -193,8 +193,8 @@ end
 
 if not (lib.bIsServer) then
     function collisionSphere:debugThread()
-        local fRadius = self.radius + 0.0
         self.debugInterval = lib.setInterval(function()
+            local fRadius = self.radius + 0.0
             DrawMarker(28, self.position.x, self.position.y, self.position.z, 0, 0, 0, 0, 0, 0, fRadius, fRadius, fRadius, self.color.r, self.color.g, self.color.b, self.color.a, false, false, 0, false, nil, nil, false)
         end, 0)
     end
