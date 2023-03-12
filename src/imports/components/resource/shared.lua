@@ -44,6 +44,12 @@ return {
     onNet = function(eventname, cb)
         lib.onNet(getResourceEventName(eventname), cb)
     end,
+    once = function(eventname, cb)
+        lib.once(getResourceEventName(eventname), cb)
+    end,
+    onceNet = function(eventname, cb)
+        lib.onceNet(getResourceEventName(eventname), cb)
+    end,
     emit = function(eventname, ...)
         lib.emit(getResourceEventName(eventname), ...)
     end,
