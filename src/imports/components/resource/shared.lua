@@ -27,40 +27,40 @@ return {
         end
     }),
     onStop = function(cb)
-        lib.on("onResourceStop", function(resource)
+        return lib.on("onResourceStop", function(resource)
             if resource ~= resourceName then return end
             cb(resource)
         end)
     end,
     onStart = function(cb)
-        lib.on("onResourceStart", function(resource)
+        return lib.on("onResourceStart", function(resource)
             if resource ~= resourceName then return end
             cb(resource)
         end)
     end,
     on = function(eventname, cb)
-        lib.on(getResourceEventName(eventname), cb)
+        return lib.on(getResourceEventName(eventname), cb)
     end,
     onNet = function(eventname, cb)
-        lib.onNet(getResourceEventName(eventname), cb)
+        return lib.onNet(getResourceEventName(eventname), cb)
     end,
     once = function(eventname, cb)
-        lib.once(getResourceEventName(eventname), cb)
+        return lib.once(getResourceEventName(eventname), cb)
     end,
     onceNet = function(eventname, cb)
-        lib.onceNet(getResourceEventName(eventname), cb)
+        return lib.onceNet(getResourceEventName(eventname), cb)
     end,
     emit = function(eventname, ...)
-        lib.emit(getResourceEventName(eventname), ...)
+        return lib.emit(getResourceEventName(eventname), ...)
     end,
     emitServer = (not lib.bIsServer) and function(eventname, ...)
-        lib.emitServer(getResourceEventName(eventname), ...)
+        return lib.emitServer(getResourceEventName(eventname), ...)
     end,
     emitClient = (lib.bIsServer) and function(eventname, target, ...)
-        lib.emitClient(getResourceEventName(eventname), target, ...)
+        return lib.emitClient(getResourceEventName(eventname), target, ...)
     end,
     emitAllClients = (lib.bIsServer) and function(eventname, ...)
-        lib.emitAllClients(getResourceEventName(eventname), -1, ...)
+        return lib.emitAllClients(getResourceEventName(eventname), -1, ...)
     end,
     callback = callback
 }
