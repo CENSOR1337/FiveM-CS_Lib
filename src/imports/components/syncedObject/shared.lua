@@ -122,6 +122,12 @@ function CreateCSyncedObject(classname)
         CreateThread(refreshObject)
     end
 
+    lib.resource.onStop(function()
+        for _, object in pairs(self.__objects) do
+            object:destroy()
+        end
+    end)
+
     return self
 end
 
