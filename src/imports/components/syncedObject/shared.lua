@@ -43,6 +43,13 @@ function CSyncedObject:destroy()
     end
 
     if (IsDuplicityVersion()) then
+        for id, object in pairs(self.__objects) do
+            if (object == self) then
+                self.__objects[id] = nil
+                self.__objectsArgs[id] = nil
+                break
+            end
+        end
         lib.resource.emitAllClients(("rep:%s:refresh"):format(self.__classname))
     end
 end
