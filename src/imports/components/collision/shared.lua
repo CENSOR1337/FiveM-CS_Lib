@@ -208,6 +208,10 @@ function collisionSphere:setRadius(radius)
     self.radius = radius + 0.0
 end
 
+function collisionSphere:getRadius()
+    return self.radius
+end
+
 return {
     collisionBase = collisionBase,
     sphere        = setmetatable({
