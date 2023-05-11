@@ -1,78 +1,59 @@
 local msgpack = msgpack
 local msgpack_pack = msgpack.pack
 
-local replicator = {}
-replicator.__index = replicator
-replicator.service = IsDuplicityVersion() and "server" or "client"
-replicator.isServer = replicator.service == "server"
-replicator.resourceName = GetCurrentResourceName()
-replicator.bagName = "cslib_rep:global"
+local GetStateBagValue = GetStateBagValue
+local SetStateBagValue = SetStateBagValue
+local AddStateBagChangeHandler = AddStateBagChangeHandler
+local RemoveStateBagChangeHandler = RemoveStateBagChangeHandler
 
-function replicator.new(name, options)
-    local self = setmetatable({}, replicator)
-    options = options or {}
-    self.name = name
-    self.data = {}
-    self.bagName = options.bagName and options.bagName or "global"
-    self.bagName = self.bagName:format("cslib_rep:%s", self.bagName)
-    if not (replicator.isServer) then
-        self.changeHandlder = AddStateBagChangeHandler(nil, self.bagName, function(bagName, key, value, _, _)
-            self.data[key] = value
-        end)
-    end
+local replication = {}
+replication.__index = replication
+
+function replication.new(id)
+    local self = setmetatable({}, replication)
+    self.id = ("%s:rep:%s"):format(lib.resource.name, tostring(id))
+    self.bagName = "global"
+    self.onChangeHandlers = {}
+    self.data = self:get()
+    self:onChange(function(value)
+        self.data = value
+    end)
+
     return self
 end
 
-function replicator:destroy()
-    if not (replicator.isServer) then
-        RemoveStateBagChangeHandler(self.changeHandlder)
+function replication:get()
+    if (self.data) then
+        return self.data
     end
-    self.data = nil
+
+    return GetStateBagValue(self.bagName, self.id)
 end
 
-function replicator:get(key)
-    local value = self.data[key]
-
-    if not (value) then
-        value = GetStateBagValue(self.bagName, key)
-        if (value) then
-            self.data[key] = value
-        end
-    end
-
-    return value
+function replication:onChange(callback)
+    assert(type(callback) == "function", "replication:onChange callback must be a function")
+    local handlerId = AddStateBagChangeHandler(self.id, self.bagName, function(bagName, key, value, _, _)
+        callback(value)
+    end)
+    self.onChangeHandlers[#self.onChangeHandlers + 1] = handlerId
+    return handlerId
 end
 
-function replicator:set(key, value)
-    if not (replicator.isServer) then return end
-
-    local keyType = type(key)
-    if (keyType ~= "number" and keyType ~= "string") then
-        return
-    end
-
-    self.data[key] = value
-
+function replication:set(value)
+    assert(lib.bIsServer, "replication:set can only be called on the server")
+    local valType = type(value)
+    assert(valType == "table" or valType == "string" or valType == "number" or valType == "boolean", "replication:set value must be a table, string, number or boolean")
     local payload = msgpack_pack(value)
-    SetStateBagValue(self.bagName, key, payload, payload:len(), replicator.isServer)
+    SetStateBagValue(self.bagName, self.id, payload, payload:len(), true)
+end
+
+function replication:destroy()
+    self.data = nil
+    for _, handler in ipairs(self.onChangeHandlers) do
+        RemoveStateBagChangeHandler(handler)
+    end
 end
 
 return {
-    replicator = setmetatable({
-        new = function(...)
-            local replicatorObject = replicator.new(...)
-            return setmetatable({}, {
-                __index = function(t, k)
-                    return replicatorObject:get(k)
-                end,
-                __newindex = function(table, key, value)
-                    replicatorObject:set(key, value)
-                end
-            })
-        end
-    }, {
-        __call = function(t, ...)
-            return t.new(...)
-        end
-    }),
+    replicated = replication.new,
 }
