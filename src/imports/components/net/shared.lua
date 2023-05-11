@@ -49,7 +49,6 @@ function replication:set(value)
 end
 
 function replication:destroy()
-    self.data = nil
     for _, handler in ipairs(self.onChangeHandlers) do
         RemoveStateBagChangeHandler(handler)
     end
