@@ -10,6 +10,7 @@ local replication = {}
 replication.__index = replication
 
 function replication.new(id)
+    assert(type(id) == "string", "replication.new id must be a string")
     local self = setmetatable({}, replication)
     self.id = ("%s:rep:%s"):format(lib.resource.name, tostring(id))
     self.bagName = "global"
