@@ -32,7 +32,7 @@ locale = function(string, vars, lang)
     end
     local localeString = langDict[string]
     if not (localeString) then
-        return ("%s was not found in the locale dictionary"):format(string)
+        return ("\"%s\" was not found in the \"%s\" dictionary"):format(string, lang)
     end
     if (vars) then
         localeString = string_gsub(localeString, "%${([%w_]+)}", vars)
