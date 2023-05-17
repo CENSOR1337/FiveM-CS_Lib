@@ -40,15 +40,14 @@ locale = function(string, vars, lang)
     return localeString
 end
 
-local function setDefaultLang(lang)
+local function setLanguage(lang)
     assert(lang ~= nil, "lang must be a string")
     assert(type(lang) == "string", "lang must be a string")
     defaultLang = lang
 end
 
 cslib_component = setmetatable({
-    load = load,
-    setDefaultLang = setDefaultLang,
+    setlanguage = setLanguage,
     loc = locale,
 }, {
     __call = function(_, ...)
