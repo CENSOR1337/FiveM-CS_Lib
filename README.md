@@ -15,25 +15,5 @@ To use `cs_lib` load imports file into your resource in your manifest file.
 shared_script "@cs_lib/imports.lua"
 ```
 
-## Features
-#### Core
-    - [ ] Game Objects Classes
-    - [x] Interval
-    - [x] Tick Pool
-#### Game
-    - [ ] Streaming
-    - [ ] Cached Game Objects
-#### Network
-    - [x] Server Callbacks
-    - [ ] Replicated Variables
-    - [ ] RPC
-#### Collision
-    - [ ] Sphere 
-    - [ ] Box
-    - [ ] Polygons
-    - [ ] Server sided collision
-#### Key
-    - [ ] Keybinds
-#### Utilities
-    - [x] Random String
-    - [ ] Hasher 
+## Documentation
+TODO
