@@ -33,7 +33,7 @@ function chancePool:addItem(chance, data)
     self.key = self.key + 1
     self.pool[self.key] = {
         chance = chance,
-        data = data
+        data = data,
     }
     self:calculateCumulative()
     return self.key
@@ -57,13 +57,11 @@ function chancePool:random()
     end
 end
 
-return {
-    rollPercentage = rollPercentage,
-    pool = setmetatable({
-        new = chancePool.new
-    }, {
-        __call = function()
-            return chancePool.new()
-        end
-    })
-}
+cslib_component.rollPercentage = rollPercentage
+cslib_component.pool = setmetatable({
+    new = chancePool.new,
+}, {
+    __call = function()
+        return chancePool.new()
+    end,
+})

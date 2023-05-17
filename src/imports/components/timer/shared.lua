@@ -33,6 +33,10 @@ function timer:destroy()
     self.bDestroyed = true
 end
 
-return {
-    new = timer.new
-}
+cslib_component = setmetatable({
+    new = timer.new,
+}, {
+    __call = function(_, ...)
+        return timer.new(...)
+    end,
+})

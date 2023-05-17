@@ -45,10 +45,8 @@ local function getPlayerPeds()
     return peds
 end
 
-return {
-    getPlayerPeds = getPlayerPeds,
-    getEntities = function()
-        return getEntitiesByTypes({ "CObject", "CPed", "CVehicle" })
-    end,
-    getEntitiesByTypes = getEntitiesByTypes,
-}
+cslib_component.getPlayerPeds = getPlayerPeds
+cslib_component.getEntities = function()
+    return getEntitiesByTypes({ "CObject", "CPed", "CVehicle" })
+end
+cslib_component.getEntitiesByTypes = getEntitiesByTypes

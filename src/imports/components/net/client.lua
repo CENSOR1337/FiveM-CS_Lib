@@ -28,13 +28,12 @@ local registerClientCallback = function(eventname, listener)
     end)
 end
 
-return {
-    callback = setmetatable({
-        register = registerClientCallback,
-        await = triggerServerCallbackSync
-    }, {
-        __call = function(t, ...)
-            return triggerServerCallback(...)
-        end
-    })
-}
+
+cslib_component.callback = setmetatable({
+    register = registerClientCallback,
+    await = triggerServerCallbackSync,
+}, {
+    __call = function(t, ...)
+        return triggerServerCallback(...)
+    end,
+})

@@ -97,11 +97,9 @@ local function drawText3d(data)
     ClearDrawOrigin()
 end
 
-return {
-    getPlayers = getPlayers,
-    getObjects = getObjects,
-    getPeds = getPeds,
-    getVehicles = getVehicles,
-    drawText2d = drawText2d,
-    drawText3d = drawText3d,
-}
+cslib_component.getPlayers = getPlayers
+cslib_component.getObjects = getObjects
+cslib_component.getPeds = getPeds
+cslib_component.getVehicles = getVehicles
+cslib_component.drawText2d = drawText2d
+cslib_component.drawText3d = drawText3d

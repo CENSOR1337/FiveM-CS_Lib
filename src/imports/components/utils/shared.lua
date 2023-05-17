@@ -32,6 +32,4 @@ randomString = function(length, options)
     return ""
 end
 
-return {
-    randomString = randomString,
-}
+cslib_component.randomString = randomString

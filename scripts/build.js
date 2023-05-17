@@ -32,32 +32,19 @@ function buildResource() {
                 sourceValid = content.length > 0;
             }
 
-            sources.push(sourceValid ? fse.readFileSync(`${filePath}/${context}.lua`, 'utf8') : `return {}`);
+            sources.push(sourceValid ? fse.readFileSync(`${filePath}/${context}.lua`, 'utf8') : ``);
         });
 
         let source = `
         components["${component}"] = function(lib)
-            local __cslib_internal = {
-                library = {},
-                shared = function()
-                    ${sources[0]}
-                end,
-                source = IsDuplicityVersion() and function()
-                    ${sources[1]}
-                end or function()
-                    ${sources[2]}
-                end,
-            }
-            
-            for key, value in pairs(__cslib_internal.shared()) do
-                __cslib_internal.library[key] = value
+            local cslib_component = {}
+                ${sources[0]}
+            if (lib.bIsServer) then
+                ${sources[1]}
+            else
+                ${sources[2]}
             end
-            
-            for key, value in pairs(__cslib_internal.source()) do
-                __cslib_internal.library[key] = value
-            end
-            
-            return __cslib_internal.library 
+            return cslib_component
         end
         `;
         componentsSource = `${componentsSource}\n${source}`;

@@ -14,9 +14,8 @@ local function getPlayers()
     return GetPlayers()
 end
 
-return {
-    getObjects = getObjects,
-    getPeds = getPeds,
-    getVehicles = getVehicles,
-    getPlayers = getPlayers,
-}
+
+cslib_component.getObjects = getObjects
+cslib_component.getPeds = getPeds
+cslib_component.getVehicles = getVehicles
+cslib_component.getPlayers = getPlayers

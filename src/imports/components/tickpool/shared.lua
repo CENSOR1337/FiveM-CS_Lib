@@ -58,7 +58,7 @@ function tickpool:clearOnTick(key)
     self.bReassignTable = true
 end
 
-return setmetatable({
+cslib_component = setmetatable({
     new = tickpool.new
 }, {
     __call = function(_, ...)

@@ -212,13 +212,11 @@ function collisionSphere:getRadius()
     return self.radius
 end
 
-return {
-    collisionBase = collisionBase,
-    sphere        = setmetatable({
-        new = collisionSphere.new,
-    }, {
-        __call = function(t, ...)
-            return t.new(...)
-        end
-    })
-}
+cslib_component.collisionBase = collisionBase
+cslib_component.sphere        = setmetatable({
+    new = collisionSphere.new,
+}, {
+    __call = function(t, ...)
+        return t.new(...)
+    end
+})

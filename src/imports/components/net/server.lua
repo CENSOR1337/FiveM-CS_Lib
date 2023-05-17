@@ -30,13 +30,11 @@ local function triggerClientCallbackSync(eventname, src, ...)
     return table_unpack(handler(...))
 end
 
-return {
-    callback = setmetatable({
-        register = registerServerCallback,
-        await = triggerClientCallbackSync
-    }, {
-        __call = function(t, ...)
-            return triggerClientCallback(...)
-        end
-    })
-}
+cslib_component.callback = setmetatable({
+    register = registerServerCallback,
+    await = triggerClientCallbackSync,
+}, {
+    __call = function(t, ...)
+        return triggerClientCallback(...)
+    end,
+})

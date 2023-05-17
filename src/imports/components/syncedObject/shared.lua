@@ -131,6 +131,10 @@ function CreateCSyncedObject(classname)
     return self
 end
 
-return {
+cslib_component = setmetatable({
     new = CreateCSyncedObject,
-}
+}, {
+    __call = function(t, ...)
+        return CreateCSyncedObject(...)
+    end,
+})

@@ -54,6 +54,4 @@ function replication:destroy()
     end
 end
 
-return {
-    replicated = replication.new,
-}
+cslib_component.replicated = replication.new

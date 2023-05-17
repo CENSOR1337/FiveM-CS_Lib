@@ -1,5 +1,4 @@
 local function requestAnimDict(animDict, cb)
-
     if type(animDict) ~= "string" then
         error(("animDict expected \"string\" (received %s)"):format(type(animDict)))
     end
@@ -18,7 +17,7 @@ local function requestAnimDict(animDict, cb)
     end
 
     RequestAnimDict(animDict)
- 
+
     local interval
     interval = lib.setInterval(function()
         if HasAnimDictLoaded(animDict) then
@@ -45,7 +44,6 @@ local function requestAnimDictSync(animDict)
 end
 
 local function requestModel(model, cb)
-
     if not (model) then
         error("model expected \"string\" or \"number\" (received nil)")
     end
@@ -96,29 +94,27 @@ local function requestModelSync(model)
     return Citizen.Await(p)
 end
 
-return {
-    animDict = {
-        request = setmetatable({
-            await = requestAnimDictSync
-        }, {
-            __call = function(_, ...)
-                return requestAnimDict(...)
-            end
-        }),
-        remove = RemoveAnimDict,
-        hasLoaded = HasAnimDictLoaded,
-        isValid = DoesAnimDictExist
-    },
-    model = {
-        request = setmetatable({
-            await = requestModelSync
-        }, {
-            __call = function(_, ...)
-                return requestModel(...)
-            end
-        }),
-        remove = SetModelAsNoLongerNeeded,
-        hasLoaded = HasModelLoaded,
-        isValid = IsModelValid
-    }
+cslib_component.animDict = {
+    request = setmetatable({
+        await = requestAnimDictSync,
+    }, {
+        __call = function(_, ...)
+            return requestAnimDict(...)
+        end,
+    }),
+    remove = RemoveAnimDict,
+    hasLoaded = HasAnimDictLoaded,
+    isValid = DoesAnimDictExist,
+}
+cslib_component.model = {
+    request = setmetatable({
+        await = requestModelSync,
+    }, {
+        __call = function(_, ...)
+            return requestModel(...)
+        end,
+    }),
+    remove = SetModelAsNoLongerNeeded,
+    hasLoaded = HasModelLoaded,
+    isValid = IsModelValid,
 }
