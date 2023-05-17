@@ -47,7 +47,7 @@ local function setLanguage(lang)
 end
 
 cslib_component = setmetatable({
-    setlanguage = setLanguage,
+    setLanguage = setLanguage,
     loc = locale,
 }, {
     __call = function(_, ...)
