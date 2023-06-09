@@ -18,7 +18,12 @@ function tickpool.new(options)
     return setmetatable(self, tickpool)
 end
 
-function tickpool:onTick(fnHandler)
+function tickpool:add(fnHandler)
+    local fnType = type(fnHandler)
+    if (fnType ~= "function" and fnType ~= "table") then
+        error(("bad argument #1 to 'add' (function, table(cfx_function) expected, got %s)"):format(fnType))
+    end
+
     self.key += 1
     self.handlers.fn[self.key] = fnHandler
     self.bReassignTable = true
@@ -46,6 +51,15 @@ function tickpool:onTick(fnHandler)
     return self.key
 end
 
+function tickpool:remove(key)
+    self.handlers.fn[key] = nil
+    self.bReassignTable = true
+end
+
+function tickpool:onTick(...)
+    return self:add(...)
+end
+
 function tickpool:destroy()
     if (self.interval) then
         self.interval:destroy()
@@ -53,9 +67,8 @@ function tickpool:destroy()
     end
 end
 
-function tickpool:clearOnTick(key)
-    self.handlers.fn[key] = nil
-    self.bReassignTable = true
+function tickpool:clearOnTick(...)
+    return self:remove(...)
 end
 
 cslib_component = setmetatable({
