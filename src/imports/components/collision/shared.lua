@@ -1,222 +1,176 @@
-local GetEntityCoords = GetEntityCoords
-local DoesEntityExist = DoesEntityExist
+local Collision = {}
+Collision.__index = Collision
 
-local collisionBase = {}
-collisionBase.__index = collisionBase
-
-function collisionBase.new(self, class, options)
-    options = options or {}
-    self = class and setmetatable(self, class) or {}
-    self.poolTypes = options.poolTypes or { "CObject", "CPed", "CVehicle" }
-    self.bOnlyRelevant = options.bOnlyRelevant or false
-    self.tickRate = options.tickRate or 500
-    self.bDebug = options.bDebug or false
-    self.color = { r = 0, g = 0, b = 255, a = 75 }
-    self.relevant = {
-        entities = {},
-        players = {}
+function Collision.new(position, options)
+    local self = setmetatable({}, Collision)
+    self.position = vec(position.x, position.y, position.z)
+    self.playersOnly = false
+    self.insideEntities = {}
+    self.dimension = 0
+    self.debug = {
+        enabled = (options.debug and options.debug.enabled) or false,
+        color = (options.debug and options.debug.color) and options.debug.color or { r = 0, g = 0, b = 255, a = 75 },
     }
-    self.overlapping = {}
+    self.tickRate = 500
+    self.destroyed = false
     self.tickpool = lib.tickpool.new()
     self.interval = lib.setInterval(function()
-        for key, entity in pairs(self.overlapping) do
-            if not (DoesEntityExist(entity.id)) then
-                if (self.tickpool and entity.interval) then
-                    self.tickpool:clearOnTick(entity.interval)
-                    entity.interval = nil
-                end
-                self.overlapping[key] = nil
-            end
-        end
-
-        local entities = {}
-        if (self.bOnlyRelevant) then
-            local count = 0
-            for _, entity in pairs(self:getRelevantEntities()) do
-                if (DoesEntityExist(entity)) then
-                    count += 1
-                    entities[count] = entity
-                end
-            end
-
-            for _, src in pairs(self:getRelevantPlayers()) do
-                local playerId = lib.bIsServer and src or GetPlayerFromServerId(src)
-                local entity = GetPlayerPed(playerId)
-                if (DoesEntityExist(entity)) then
-                    count += 1
-                    entities[count] = entity
-                end
-            end
-        else
-            entities = lib.game.getEntitiesByTypes(self.poolTypes)
-        end
-        for i = 1, #entities, 1 do
-            local entityId = entities[i]
-            local entity = self.overlapping[entityId] or { id = entityId }
-
-            entity.coords = GetEntityCoords(entity.id)
-            local bInside = self:isPointInside(entity.coords)
-
-            if (bInside) then
-                if not (self.overlapping[entity.id]) then
-                    if (self.onBeginOverlap) then
-                        self:onBeginOverlap(entity)
-                    end
-
-                    if (self.tickpool and self.onOverlapping) then
-                        entity.interval = self.tickpool:onTick(function()
-                            local entityPara = {}
-                            entityPara.id = entity.id
-                            entityPara.coords = entity.coords
-                            self:onOverlapping(entityPara)
-                        end)
-                    end
-                end
-            else
-                if (self.overlapping[entity.id]) then
-                    if (self.onOverlapping) then
-                        if (self.tickpool and entity.interval) then
-                            self.tickpool:clearOnTick(entity.interval)
-                            entity.interval = nil
-                        end
-                    end
-
-                    if (self.onEndOverlap) then
-                        self:onEndOverlap(entity)
-                    end
-                end
-            end
-
-            self.overlapping[entity.id] = bInside and entity or nil
-        end
+        self:onTick()
     end, self.tickRate)
+    self.tickpoolIds = {}
+    self.listeners = {
+        enter = lib.dispatcher.new(),
+        overlap = lib.dispatcher.new(),
+        exit = lib.dispatcher.new(),
+    }
 
-    if (self.debugThread and self.bDebug) then
-        self:debugThread()
+    self:onBeginOverlap(function(handle)
+        self.tickpoolIds[handle] = self.tickpool:onTick(function()
+            self.listeners.overlap:broadcast(handle)
+        end)
+    end)
+
+    self:onEndOverlap(function(handle)
+        self.tickpool:remove(self.tickpoolIds[handle])
+        self.tickpoolIds[handle] = nil
+    end)
+
+    if (self.debug and self.debug.enabled) then
+        CreateThread(function() -- Wait for child class to be initialized
+            if (self.debugThread) then
+                self:debugThread()
+            end
+        end)
     end
 
     return self
 end
 
-function collisionBase:destroy()
-    if (self.interval) then
-        self.interval:destroy()
-        self.interval = nil
-    end
-
-    if (self.debugInterval) then
-        self.debugInterval:destroy()
-        self.debugInterval = nil
-    end
-
-    if (self.tickpool) then
+function Collision:onTick()
+    if (self.destroyed) then
         self.tickpool:destroy()
-        self.tickpool = nil
+        self.interval:destroy()
+        for handle, _ in pairs(self.insideEntities) do
+            self.listeners.exit:broadcast(handle)
+        end
+        return
+    end
+
+    local entities = {}
+
+    if (self.playersOnly) then
+        entities = lib.game.getPlayerPeds()
+    else
+        entities = lib.game.getEntities()
+    end
+
+    for handle, _ in pairs(self.insideEntities) do
+        local isValid = self:isEntityValid(handle)
+        if not (isValid) then
+            self.insideEntities[handle] = nil
+            self.listeners.exit:broadcast(handle)
+        end
+    end
+
+    for i = 1, #entities, 1 do
+        local handle = entities[i]
+        if not ((self.insideEntities[handle])) then
+            local isValid = self:isEntityValid(handle)
+            if (isValid) then
+                self.insideEntities[handle] = true
+                self.listeners.enter:broadcast(handle)
+            end
+        end
     end
 end
 
-function collisionBase:addRelevantEntity(entity)
-    if not (DoesEntityExist(entity)) then return end
-    if (self:isEntityRelevant(entity)) then return end
-    self.relevant.entities[entity] = entity
+function Collision:isEntityValid(handle)
+    if not (DoesEntityExist(handle)) then return false end
+    if not (self:isEntityInside(handle)) then return false end
+    if (lib.bIsServer) then
+        if not (GetEntityRoutingBucket(handle) == self.dimension) then return false end
+    end
+    return true
 end
 
-function collisionBase:removeRelevantEntity(entity)
-    if not (self:isEntityRelevant(entity)) then return end
-    self.relevant.entities[entity] = nil
+function Collision:isEntityInside(handle)
+    return false -- implement in child class
 end
 
-function collisionBase:isEntityRelevant(entity)
-    return self.relevant.entities[entity] ~= nil
+function Collision:isPositionInside(position)
+    return false -- implement in child class
 end
 
-function collisionBase:clearRelevantEntities()
-    self.relevant.entities = {}
+function Collision:onBeginOverlap(listener)
+    local id = self.listeners.enter:add(listener)
+    return { id = id, type = "enter" }
 end
 
-function collisionBase:getRelevantEntities()
-    return self.relevant.entities
+function Collision:onOverlapping(listener)
+    local id = self.listeners.overlap:add(listener)
+    return { id = id, type = "overlap" }
 end
 
-function collisionBase:addRelevantPlayer(src)
-    if (self:isPlayerRelevant(src)) then return end
-    self.relevant.players[src] = src
+function Collision:onEndOverlap(listener)
+    local id = self.listeners.exit:add(listener)
+    return { id = id, type = "exit" }
 end
 
-function collisionBase:removeRelevantPlayer(src)
-    if not (self:isPlayerRelevant(src)) then return end
-    self.relevant.players[src] = nil
+function Collision:off(listenerInfo)
+    if (listenerInfo.type == "enter") then
+        self.listeners.enter:remove(listenerInfo.id)
+    elseif (listenerInfo.type == "exit") then
+        self.listeners.exit:remove(listenerInfo.id)
+    elseif (listenerInfo.type == "overlap") then
+        self.listeners.overlap:remove(listenerInfo.id)
+    end
 end
 
-function collisionBase:isPlayerRelevant(src)
-    return self.relevant.players[src] ~= nil
+function Collision:destroy()
+    self.destroyed = true
 end
 
-function collisionBase:clearRelevantPlayers()
-    self.relevant.players = {}
-end
+local CollisionSphere = {}
+CollisionSphere.__index = CollisionSphere
+setmetatable(CollisionSphere, { __index = Collision })
 
-function collisionBase:getRelevantPlayers()
-    return self.relevant.players
-end
+function CollisionSphere.new(position, radius, options)
+    if not (position) then
+        error("bad argument #1 to 'new' (vector3 expected, got no value)")
+    end
 
-function collisionBase:clearRelevant()
-    self:clearRelevantEntities()
-    self:clearRelevantPlayers()
-end
+    if not (radius) then
+        error("bad argument #2 to 'new' (number expected, got no value)")
+    end
 
---[[ Sphere ]]
-local collisionSphere = {}
-collisionSphere.__index = collisionSphere
-setmetatable(collisionSphere, collisionBase)
-
-function collisionSphere.new(coords, radius, options)
-    if not (coords) then error("no coords provide to collisionSphere") end
-    if not (radius) then error("no radius provide to collisionSphere") end
-
-    local self = {}
-    self.type = "sphere"
-    self.position = vector3(coords.x, coords.y, coords.z)
+    local self = setmetatable(Collision.new(position, options), CollisionSphere)
     self.radius = radius
-
-    return collisionBase.new(self, collisionSphere, options)
+    return self
 end
 
-function collisionSphere:isPointInside(coords)
-    local distance = #(vec(coords.x, coords.y, coords.z) - self.position)
-    return (distance <= self.radius)
+function CollisionSphere:isPositionInside(position)
+    local dist = #(position - self.position)
+    return (dist <= self.radius)
 end
 
-function collisionSphere:isEntityInside(entity)
-    return self:isPointInside(GetEntityCoords(entity))
+function CollisionSphere:isEntityInside(handle)
+    local dist = #(GetEntityCoords(handle) - self.position)
+    return (dist <= self.radius)
 end
 
-if not (lib.bIsServer) then
-    function collisionSphere:debugThread()
-        self.debugInterval = lib.setInterval(function()
-            local fRadius = self.radius + 0.0
-            DrawMarker(28, self.position.x, self.position.y, self.position.z, 0, 0, 0, 0, 0, 0, fRadius, fRadius, fRadius, self.color.r, self.color.g, self.color.b, self.color.a, false, false, 0, false, nil, nil, false)
-        end, 0)
-    end
+function CollisionSphere:debugThread()
+    if (lib.bIsServer) then return end
+    self.tickpool:add(function()
+        local fRadius = self.radius + 0.0
+        local color = self.debug.color
+        DrawMarker(28, self.position.x, self.position.y, self.position.z, 0, 0, 0, 0, 0, 0, fRadius, fRadius, fRadius, color.r, color.g, color.b, color.a, false, false, 0, false, nil, nil, false)
+    end)
 end
 
-function collisionSphere:setOrigin(coords)
-    self.position = vector3(coords.x, coords.y, coords.z)
-end
-
-function collisionSphere:setRadius(radius)
-    self.radius = radius + 0.0
-end
-
-function collisionSphere:getRadius()
-    return self.radius
-end
-
-cslib_component.collisionBase = collisionBase
-cslib_component.sphere        = setmetatable({
-    new = collisionSphere.new,
+cslib_component.sphere = setmetatable({
+    new = CollisionSphere.new,
 }, {
-    __call = function(t, ...)
-        return t.new(...)
-    end
+    __call = function(_, ...)
+        return CollisionSphere.new(...)
+    end,
 })

@@ -1,10 +1,46 @@
 cslib_component.sphere = setmetatable({
     new = function(coords, radius, options)
+        local zoneObject = {}
         options = options or {}
-        options.bOnlyRelevant = true
-        local collision = lib.collision.sphere(coords, radius, options)
-        collision:addRelevantPlayer(GetPlayerServerId(PlayerId()))
-        return collision
+        local collision = lib.collision.sphere(coords, radius, {
+            debug = {
+                enabled = options.bDebug or false,
+                color = options.color,
+            },
+        })
+        collision.playersOnly = true
+
+        collision:onBeginOverlap(function(other)
+            if (other ~= PlayerPedId()) then return end
+            if (zoneObject.onBeginOverlap) then
+                zoneObject.onBeginOverlap(other)
+            end
+        end)
+
+        collision:onOverlapping(function(other)
+            if (other ~= PlayerPedId()) then return end
+            if (zoneObject.onOverlapping) then
+                zoneObject.onOverlapping(other)
+            end
+        end)
+
+        collision:onEndOverlap(function(other)
+            if (other ~= PlayerPedId()) then return end
+            if (zoneObject.onEndOverlap) then
+                zoneObject.onEndOverlap(other)
+            end
+        end)
+
+        zoneObject.isPointInside = function(self, coords)
+            coords = vec(coords.x, coords.y, coords.z)
+            return collision:isPositionInside(coords)
+        end
+
+        zoneObject.isEntityInside = function(self, entity)
+            return collision:isEntityInside(entity)
+        end
+
+        return zoneObject
     end,
 }, {
     __call = function(t, ...)
