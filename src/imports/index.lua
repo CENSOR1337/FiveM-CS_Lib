@@ -66,11 +66,17 @@ lib.clearOnTick = function(key)
     baseTickPool:clearOnTick(key)
 end
 
-lib.typeCheck = function(value, types)
+lib.typeCheck = function(value, ...)
+    local types = { ... }
     if (#types == 0) then return true end
     local mapType = {}
     for i = 1, #types, 1 do
         mapType[types[i]] = true
     end
-    return mapType[type(value)] ~= nil
+    local valueType = type(value)
+    local requireTypes = table.concat(types, " or ")
+    local errorMessage = ("bad value (%s expected, got %s)"):format(requireTypes, valueType)
+    local matches = mapType[valueType] ~= nil
+    assert(matches, errorMessage)
+    return matches
 end
