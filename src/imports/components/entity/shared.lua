@@ -12,23 +12,14 @@ local createVehicle = function(model, position, rotation, isNetwork)
     return entity
 end
 
+local typeEnum = {
+    VEHICLE = "vehicle",
+    PED = "ped",
+    OBJECT = "object",
+}
+
 local Entity = {}
 Entity.__index = Entity
-
-local typeCheck = function(value, ...)
-    local types = { ... }
-    if (#types == 0) then return true end
-    local mapType = {}
-    for i = 1, #types, 1 do
-        mapType[types[i]] = true
-    end
-    local valueType = type(value)
-    local requireTypes = table.concat(types, " or ")
-    local errorMessage = ("bad value (%s expected, got %s)"):format(requireTypes, valueType)
-    local matches = mapType[valueType] ~= nil
-    assert(matches, errorMessage)
-    return matches
-end
 
 local classWarp = function(class, ...)
     return setmetatable({
@@ -40,18 +31,18 @@ local classWarp = function(class, ...)
     })
 end
 
-function Entity.new(modelHash, position, rotation, isNetwork)
-    typeCheck(modelHash, "string", "number")
-    typeCheck(position, "vector3", "vec4")
-    typeCheck(rotation, "vector3", "vec4")
-    typeCheck(isNetwork, "boolean", "nil")
+function Entity.new(modelHash, position, rotation, entityType, isNetwork)
+    lib.typeCheck(modelHash, "string", "number")
+    lib.typeCheck(position, "vector3", "vector4", "table")
+    lib.typeCheck(rotation, "vector3", "vector4", "table")
+    lib.typeCheck(isNetwork, "boolean", "nil")
 
     if (lib.bIsServer) then
         isNetwork = true
     end
 
     local self = setmetatable({}, Entity)
-    self.model = type(modelHash) == "number" and modelHash or GetHashKey(modelHash)
+    self.model = type(modelHash) == "number" and modelHash or joaat(modelHash)
     self.position = vec(position.x, position.y, position.z)
     self.rotation = vec(rotation.x, rotation.y, rotation.z)
     self.isNetwork = isNetwork and true or false
@@ -64,7 +55,13 @@ function Entity.new(modelHash, position, rotation, isNetwork)
             lib.streaming.model.request.await(self.model)
         end
         if (self.destroyed) then return end
-        self.entity = self:createEntity()
+        if (entityType == typeEnum.VEHICLE) then
+            self.entity = createVehicle(self.model, self.position, self.rotation, self.isNetwork)
+        elseif (entityType == typeEnum.PED) then
+            self.entity = CreatePed(4, self.model, self.position.x, self.position.y, self.position.z, self.rotation.z, self.isNetwork, false)
+        elseif (entityType == typeEnum.OBJECT) then
+            self.entity = CreateObjectNoOffset(self.model, self.position.x, self.position.y, self.position.z, self.isNetwork, false, false)
+        end
         self:setPosition(self.position)
         self:setRotation(self.rotation)
     end)
@@ -73,21 +70,17 @@ function Entity.new(modelHash, position, rotation, isNetwork)
 end
 
 function Entity:setPosition(position)
-    typeCheck(position, "vector3", "table", "vec")
+    lib.typeCheck(position, "vector3", "vector4", "table")
     self.position = vec(position.x, position.y, position.z)
     if not (self:isValid()) then return end
     SetEntityCoords(self.entity, self.position.x, self.position.y, self.position.z, false, false, false, false)
 end
 
 function Entity:setRotation(rotation)
-    typeCheck(rotation, "vector3", "table", "vec")
+    lib.typeCheck(rotation, "vector3", "vector4", "table")
     self.rotation = vec(rotation.x, rotation.y, rotation.z)
     if not (self:isValid()) then return end
     SetEntityRotation(self.entity, self.rotation.x, self.rotation.y, self.rotation.z, 0, false)
-end
-
-function Entity:createEntity()
-    return 0
 end
 
 function Entity:getEntity()
@@ -110,12 +103,8 @@ Object.__index = Object
 setmetatable(Object, { __index = Entity })
 
 function Object.new(model, position, rotation)
-    local self = setmetatable(Entity.new(model, position, rotation), Object)
+    local self = setmetatable(Entity.new(model, position, rotation, typeEnum.OBJECT), Object)
     return self
-end
-
-function Object:createEntity()
-    return CreateObjectNoOffset(self.model, self.position.x, self.position.y, self.position.z, self.isNetwork, false, false)
 end
 
 -- @ class Ped
@@ -124,12 +113,8 @@ Ped.__index = Ped
 setmetatable(Ped, { __index = Entity })
 
 function Ped.new(model, position, rotation)
-    local self = setmetatable(Entity.new(model, position, rotation), Ped)
+    local self = setmetatable(Entity.new(model, position, rotation, typeEnum.PED), Ped)
     return self
-end
-
-function Ped:createEntity()
-    return CreatePed(4, self.model, self.position.x, self.position.y, self.position.z, self.rotation.z, self.isNetwork, false)
 end
 
 -- @ class Vehicle
@@ -138,12 +123,8 @@ Vehicle.__index = Vehicle
 setmetatable(Vehicle, { __index = Entity })
 
 function Vehicle.new(model, position, rotation)
-    local self = setmetatable(Entity.new(model, position, rotation), Vehicle)
+    local self = setmetatable(Entity.new(model, position, rotation, typeEnum.VEHICLE), Vehicle)
     return self
-end
-
-function Vehicle:createEntity()
-    return createVehicle(self.model, self.position, self.rotation, self.isNetwork)
 end
 
 cslib_component.object = classWarp(Object)
