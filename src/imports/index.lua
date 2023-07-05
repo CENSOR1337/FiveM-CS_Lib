@@ -65,3 +65,12 @@ lib.clearOnTick = function(key)
     if not (baseTickPool) then return end
     baseTickPool:clearOnTick(key)
 end
+
+lib.typeCheck = function(value, types)
+    if (#types == 0) then return true end
+    local mapType = {}
+    for i = 1, #types, 1 do
+        mapType[types[i]] = true
+    end
+    return mapType[type(value)] ~= nil
+end
