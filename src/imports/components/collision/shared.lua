@@ -135,13 +135,8 @@ CollisionSphere.__index = CollisionSphere
 setmetatable(CollisionSphere, { __index = Collision })
 
 function CollisionSphere.new(position, radius, options)
-    if not (position) then
-        error("bad argument #1 to 'new' (vector3 expected, got no value)")
-    end
-
-    if not (radius) then
-        error("bad argument #2 to 'new' (number expected, got no value)")
-    end
+    lib.typeCheck(position, "vector3", "vector4", "table")
+    lib.typeCheck(radius, "number")
 
     local self = setmetatable(Collision.new(position, options), CollisionSphere)
     self.radius = radius
