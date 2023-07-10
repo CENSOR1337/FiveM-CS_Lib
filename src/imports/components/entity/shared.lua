@@ -82,8 +82,10 @@ function Entity:waitForCreation()
         p:resolve(true)
         return CitizenAwait(p)
     end
-    self.onCreated:add(function()
+    local dispatchId
+    dispatchId = self.onCreated:add(function()
         p:resolve(true)
+        self.onCreated:remove(dispatchId)
     end)
     return CitizenAwait(p)
 end
