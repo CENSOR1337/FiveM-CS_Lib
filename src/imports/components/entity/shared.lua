@@ -1,4 +1,8 @@
 local _in = Citizen.InvokeNative
+local Citizen = Citizen
+local CitizenAwait = Citizen.Await
+local CreateThreadNow = Citizen.CreateThreadNow
+
 local createVehicle = function(model, position, rotation, isNetwork)
     local entity
     if (lib.isServer) then
@@ -48,9 +52,11 @@ function Entity.new(modelHash, position, rotation, entityType, isNetwork)
     self.isNetwork = isNetwork and true or false
     self.entity = 0
     self.destroyed = false
+    self.onCreated = lib.dispatcher()
+    self.onDestroyed = lib.dispatcher()
 
     -- Init
-    CreateThread(function()
+    CreateThreadNow(function()
         if not (lib.bIsServer) then
             lib.streaming.model.request.await(self.model)
         end
@@ -62,11 +68,24 @@ function Entity.new(modelHash, position, rotation, entityType, isNetwork)
         elseif (entityType == typeEnum.OBJECT) then
             self.entity = CreateObjectNoOffset(self.model, self.position.x, self.position.y, self.position.z, self.isNetwork, false, false)
         end
+        self.onCreated:broadcast()
         self:setPosition(self.position)
         self:setRotation(self.rotation)
     end)
 
     return self
+end
+
+function Entity:waitForCreation()
+    local p = promise.new()
+    if (self:isValid()) then
+        p:resolve(true)
+        return CitizenAwait(p)
+    end
+    self.onCreated:add(function()
+        p:resolve(true)
+    end)
+    return CitizenAwait(p)
 end
 
 function Entity:setPosition(position)
@@ -93,6 +112,7 @@ end
 
 function Entity:destroy()
     self.destroyed = true
+    self.onDestroyed:broadcast()
     if not (self:isValid()) then return end
     DeleteEntity(self.entity)
 end
