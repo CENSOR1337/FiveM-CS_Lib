@@ -2,7 +2,8 @@ local table_unpack = table.unpack
 local Citizen_Await = Citizen.Await
 
 local triggerServerCallback = function(eventname, listener, ...)
-    if not (listener) then error("listener for server callback is nil") end
+    lib.typeCheck(eventname, "string")
+    lib.typeCheck(listener, "function", "table")
     local callbackId = lib.utils.randomString(16)
     local cbEventName = "cslib:svcb:" .. eventname
     lib.onceNet(cbEventName .. callbackId, listener)

@@ -19,10 +19,7 @@ function tickpool.new(options)
 end
 
 function tickpool:add(fnHandler)
-    local fnType = type(fnHandler)
-    if (fnType ~= "function" and fnType ~= "table") then
-        error(("bad argument #1 to 'add' (function, table(cfx_function) expected, got %s)"):format(fnType))
-    end
+    lib.typeCheck(fnHandler, "function", "table")
 
     self.key += 1
     self.handlers.fn[self.key] = fnHandler
@@ -72,9 +69,9 @@ function tickpool:clearOnTick(...)
 end
 
 cslib_component = setmetatable({
-    new = tickpool.new
+    new = tickpool.new,
 }, {
     __call = function(_, ...)
         return tickpool.new(...)
-    end
+    end,
 })
