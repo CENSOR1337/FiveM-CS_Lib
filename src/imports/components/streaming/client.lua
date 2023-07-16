@@ -1,11 +1,6 @@
 local function requestAnimDict(animDict, cb)
-    if type(animDict) ~= "string" then
-        error(("animDict expected \"string\" (received %s)"):format(type(animDict)))
-    end
-
-    if not (cb) then
-        error("callback expected \"function\" (received nil)")
-    end
+    lib.typeCheck(animDict, "string")
+    lib.typeCheck(cb, "function", "table")
 
     if not DoesAnimDictExist(animDict) then
         error(("animDict \"%s\" was not exist"):format(animDict))
@@ -44,13 +39,8 @@ local function requestAnimDictSync(animDict)
 end
 
 local function requestModel(model, cb)
-    if not (model) then
-        error("model expected \"string\" or \"number\" (received nil)")
-    end
-
-    if not (cb) then
-        error("callback expected \"function\" (received nil)")
-    end
+    lib.typeCheck(model, "string", "number")
+    lib.typeCheck(cb, "function", "table")
 
     local modelStr
     if type(model) ~= "number" then
