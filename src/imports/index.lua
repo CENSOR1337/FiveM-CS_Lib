@@ -80,3 +80,5 @@ lib.typeCheck = function(value, ...)
     assert(matches, errorMessage)
     return matches
 end
+
+lib.randomUUID = lib.utils.randomUUID

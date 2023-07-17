@@ -1,4 +1,5 @@
 local math_random = math.random
+local string_format = string.format
 
 local Charset = {
     numeric = { len = 0, chars = {} },
@@ -32,4 +33,24 @@ randomString = function(length, options)
     return ""
 end
 
+local function uuidCharacter(position)
+    if (position == 9) then return "-" end
+    if (position == 14) then return "-" end
+    if (position == 15) then return "4" end
+    if (position == 19) then return "-" end
+    if (position == 20) then return string_format("%x", math_random(8, 0xb)) end
+    if (position == 24) then return "-" end
+    return string_format("%x", math_random(0, 0xf))
+end
+
+local randomUUID
+randomUUID = function()
+    local id = ""
+    for i = 1, 36, 1 do
+        id = id .. uuidCharacter(i)
+    end
+    return id
+end
+
+cslib_component.randomUUID = randomUUID
 cslib_component.randomString = randomString
