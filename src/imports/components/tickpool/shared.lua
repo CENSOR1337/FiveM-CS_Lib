@@ -35,8 +35,7 @@ function tickpool:add(fnHandler)
                 end
                 self.handlers.length = #listEntries
                 if (self.handlers.length <= 0) then
-                    self.interval:destroy()
-                    self.interval = nil
+                    self:clearTimer()
                 end
             end
             for i = 1, self.handlers.length, 1 do
@@ -57,11 +56,14 @@ function tickpool:onTick(...)
     return self:add(...)
 end
 
+function tickpool:clearTimer()
+    if not (self.interval) then return end
+    self.interval:destroy()
+    self.interval = nil
+end
+
 function tickpool:destroy()
-    if (self.interval) then
-        self.interval:destroy()
-        self.interval = nil
-    end
+    self:clearTimer()
 end
 
 function tickpool:clearOnTick(...)
