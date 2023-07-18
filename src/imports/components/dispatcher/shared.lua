@@ -18,7 +18,7 @@ function Dispatcher:add(listener)
 end
 
 function Dispatcher:remove(id)
-    for i = 1, #self.listenerId, 1 do
+    for i = 1, #self.listeners, 1 do
         local listenerInfo = self.listeners[i]
         if (listenerInfo.id == id) then
             table.remove(self.listeners, i)
