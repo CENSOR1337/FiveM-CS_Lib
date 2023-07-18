@@ -33,14 +33,31 @@ randomString = function(length, options)
     return ""
 end
 
+local uuidPool = {
+    { size = 0, chars = {} },
+    { size = 0, chars = {} },
+}
+
+for i = 8, 0xb, 1 do
+    local set = uuidPool[1]
+    set.chars[#set.chars + 1] = string_format("%x", i)
+    set.size = #set.chars
+end
+
+for i = 0, 0xf, 1 do
+    local set = uuidPool[2]
+    set.chars[#set.chars + 1] = string_format("%x", i)
+    set.size = #set.chars
+end
+
 local function uuidCharacter(position)
     if (position == 9) then return "-" end
     if (position == 14) then return "-" end
     if (position == 15) then return "4" end
     if (position == 19) then return "-" end
-    if (position == 20) then return string_format("%x", math_random(8, 0xb)) end
+    if (position == 20) then return uuidPool[1].chars[math_random(1, uuidPool[1].size)] end
     if (position == 24) then return "-" end
-    return string_format("%x", math_random(0, 0xf))
+    return uuidPool[2].chars[math_random(1, uuidPool[2].size)]
 end
 
 local randomUUID
