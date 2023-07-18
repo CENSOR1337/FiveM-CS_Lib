@@ -15,6 +15,7 @@ function Dispatcher:add(listener)
         listener = listener,
     }
     self.listeners[#self.listeners + 1] = listenerInfo
+    return listenerInfo.id
 end
 
 function Dispatcher:remove(id)
