@@ -39,6 +39,10 @@ cslib_component.sphere = setmetatable({
         zoneObject.isEntityInside = function(self, entity)
             return collision:isEntityInside(entity)
         end
+        
+        zoneObject.destroy = function(self)
+            collision:destroy()
+        end
 
         return zoneObject
     end,
