@@ -44,7 +44,7 @@ end
 lib.registerServerCallback = lib.net.registerServerCallback
 lib.emitClient = isServer and TriggerClientEvent
 lib.emitAllClients = isServer and function(eventname, ...)
-    self.emitClient(eventname, -1, ...)
+    lib.emitClient(eventname, -1, ...)
 end
 lib.onClient = isServer and RegisterNetEvent
 
