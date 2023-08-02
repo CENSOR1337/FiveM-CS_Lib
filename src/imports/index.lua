@@ -46,11 +46,13 @@ lib.emitClient = isServer and TriggerClientEvent
 lib.emitAllClients = isServer and function(eventname, ...)
     self.emitClient(eventname, -1, ...)
 end
+lib.onClient = isServer and RegisterNetEvent
 
 -- Client
 lib.triggerServerCallback = not isServer and lib.net.triggerServerCallback
 lib.triggerServerCallbackSync = not isServer and lib.net.triggerServerCallbackSync
 lib.emitServer = not isServer and TriggerServerEvent
+lib.onServer = not isServer and RegisterNetEvent
 
 -- Tick Pool
 local baseTickPool
