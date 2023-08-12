@@ -13,9 +13,9 @@ local callback = setmetatable({
         return lib.net.callback.await(eventname, ...)
     end,
 }, {
-    __call = function(_, eventname, cb)
+    __call = function(_, eventname, cb, ...)
         eventname = getResourceEventName(eventname)
-        return lib.net.callback(eventname, cb)
+        return lib.net.callback(eventname, cb, ...)
     end,
 })
 
