@@ -56,13 +56,7 @@ function Collision:onTick()
         return
     end
 
-    local entities = {}
-
-    if (self.playersOnly) then
-        entities = lib.game.getPlayerPeds()
-    else
-        entities = lib.game.getEntities()
-    end
+    local entities = self:getRevelantEntities()
 
     for handle, _ in pairs(self.insideEntities) do
         local isValid = self:isEntityValid(handle)
@@ -82,6 +76,14 @@ function Collision:onTick()
             end
         end
     end
+end
+
+function Collision:getRevelantEntities()
+    if (self.playersOnly) then
+        return lib.game.getPlayerPeds()
+    end
+
+    return lib.game.getEntities()
 end
 
 function Collision:isEntityValid(handle)
