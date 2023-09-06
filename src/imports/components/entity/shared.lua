@@ -50,7 +50,7 @@ function Entity.new(modelHash, position, rotation, entityType, isNetwork)
     self.position = vec(position.x, position.y, position.z)
     self.rotation = vec(rotation.x, rotation.y, rotation.z)
     self.isNetwork = isNetwork and true or false
-    self.entity = 0
+    self.handle = 0
     self.destroyed = false
     self.onCreated = lib.dispatcher()
     self.onDestroyed = lib.dispatcher()
@@ -62,11 +62,11 @@ function Entity.new(modelHash, position, rotation, entityType, isNetwork)
         end
         if (self.destroyed) then return end
         if (entityType == typeEnum.VEHICLE) then
-            self.entity = createVehicle(self.model, self.position, self.rotation, self.isNetwork)
+            self.handle = createVehicle(self.model, self.position, self.rotation, self.isNetwork)
         elseif (entityType == typeEnum.PED) then
-            self.entity = CreatePed(4, self.model, self.position.x, self.position.y, self.position.z, self.rotation.z, self.isNetwork, false)
+            self.handle = CreatePed(4, self.model, self.position.x, self.position.y, self.position.z, self.rotation.z, self.isNetwork, false)
         elseif (entityType == typeEnum.OBJECT) then
-            self.entity = CreateObjectNoOffset(self.model, self.position.x, self.position.y, self.position.z, self.isNetwork, false, false)
+            self.handle = CreateObjectNoOffset(self.model, self.position.x, self.position.y, self.position.z, self.isNetwork, false, false)
         end
         self.onCreated:broadcast()
         self:setPosition(self.position)
@@ -94,29 +94,33 @@ function Entity:setPosition(position)
     lib.typeCheck(position, "vector3", "vector4", "table")
     self.position = vec(position.x, position.y, position.z)
     if not (self:isValid()) then return end
-    SetEntityCoords(self.entity, self.position.x, self.position.y, self.position.z, false, false, false, false)
+    SetEntityCoords(self.handle, self.position.x, self.position.y, self.position.z, false, false, false, false)
 end
 
 function Entity:setRotation(rotation)
     lib.typeCheck(rotation, "vector3", "vector4", "table")
     self.rotation = vec(rotation.x, rotation.y, rotation.z)
     if not (self:isValid()) then return end
-    SetEntityRotation(self.entity, self.rotation.x, self.rotation.y, self.rotation.z, 0, false)
+    SetEntityRotation(self.handle, self.rotation.x, self.rotation.y, self.rotation.z, 0, false)
 end
 
 function Entity:getEntity()
-    return self.entity
+    return self.handle
+end
+
+function Entity:getHandle()
+    return self.handle
 end
 
 function Entity:isValid()
-    return DoesEntityExist(self.entity)
+    return DoesEntityExist(self.handle)
 end
 
 function Entity:destroy()
     self.destroyed = true
     self.onDestroyed:broadcast()
     if not (self:isValid()) then return end
-    DeleteEntity(self.entity)
+    DeleteEntity(self.handle)
 end
 
 -- @ class Object
