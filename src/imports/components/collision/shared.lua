@@ -165,6 +165,15 @@ function CollisionSphere:debugThread()
     end)
 end
 
+function CollisionSphere:setRadius(radius)
+    lib.typeCheck(radius, "number")
+    self.radius = radius
+end
+
+function CollisionSphere:getRadius()
+    return self.radius
+end
+
 cslib_component.sphere = setmetatable({
     new = CollisionSphere.new,
     classes = CollisionSphere,
