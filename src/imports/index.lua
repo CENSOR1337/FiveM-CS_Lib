@@ -86,4 +86,5 @@ lib.typeCheck = function(value, ...)
 end
 
 lib.randomUUID = lib.utils.randomUUID
-lib.module = lib.utils.module
+lib.export = lib.module.export
+lib.import = lib.module.import
