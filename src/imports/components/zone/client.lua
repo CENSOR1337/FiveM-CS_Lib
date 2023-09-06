@@ -44,6 +44,14 @@ cslib_component.sphere = setmetatable({
             collision:destroy()
         end
 
+        zoneObject.setRadius = function(self, radius)
+            collision.radius = radius
+        end
+
+        zoneObject.getRadius = function(self)
+            return collision.radius
+        end
+
         return zoneObject
     end,
 }, {
