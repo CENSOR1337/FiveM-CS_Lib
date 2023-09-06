@@ -1,7 +1,7 @@
 local defaultLang = "en"
 local dictionary = {}
 
-function load(lang)
+local function load(lang)
     assert(lang ~= nil, "lang must be a string")
     assert(type(lang) == "string", "lang must be a string")
     local locales = json.decode(LoadResourceFile(lib.resource.name, ("locales/%s.json"):format(lang)))
