@@ -2,6 +2,7 @@ local Collision = {}
 Collision.__index = Collision
 
 function Collision.new(position, options)
+    options = options or {}
     local self = setmetatable({}, Collision)
     self.position = vec(position.x, position.y, position.z)
     self.playersOnly = false
