@@ -167,6 +167,7 @@ end
 
 cslib_component.sphere = setmetatable({
     new = CollisionSphere.new,
+    classes = CollisionSphere,
 }, {
     __call = function(_, ...)
         return CollisionSphere.new(...)
