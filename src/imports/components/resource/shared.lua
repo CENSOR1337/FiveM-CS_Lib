@@ -62,4 +62,8 @@ end
 cslib_component.emitAllClients = (lib.bIsServer) and function(eventname, ...)
     return lib.emitAllClients(getResourceEventName(eventname), -1, ...)
 end
+cslib_component.onServer = cslib_component.onNet
+cslib_component.onClient = cslib_component.onNet
+cslib_component.onceServer = cslib_component.onceNet
+cslib_component.onceClient = cslib_component.onceNet
 cslib_component.callback = callback
