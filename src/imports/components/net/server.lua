@@ -21,9 +21,15 @@ end
 local function triggerClientCallbackSync(eventname, src, ...)
     local function handler(...)
         local p = promise.new()
+        local timeout = false
         triggerClientCallback(eventname, src, function(...)
+            if (timeout) then return end
             p:resolve({ ... })
         end, ...)
+        lib.setTimeout(function()
+            timeout = true
+            p:resolve()
+        end, 15 * 1000)
         return Citizen_Await(p)
     end
 
