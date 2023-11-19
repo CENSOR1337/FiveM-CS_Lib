@@ -60,7 +60,7 @@ cslib_component.emitClient = (lib.bIsServer) and function(eventname, target, ...
     return lib.emitClient(getResourceEventName(eventname), target, ...)
 end
 cslib_component.emitAllClients = (lib.bIsServer) and function(eventname, ...)
-    return lib.emitAllClients(getResourceEventName(eventname), -1, ...)
+    return lib.emitAllClients(getResourceEventName(eventname), ...)
 end
 cslib_component.onServer = cslib_component.onNet
 cslib_component.onClient = cslib_component.onNet
