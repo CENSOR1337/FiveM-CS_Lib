@@ -68,4 +68,10 @@ function set:clear()
     self.length = 0
 end
 
-cslib_component.set = set
+cslib_component.set = setmetatable({
+    new = set.new,
+}, {
+    __call = function(_, ...)
+        return set.new(...)
+    end,
+})
