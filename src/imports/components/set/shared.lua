@@ -1,12 +1,20 @@
 local set = {}
 set.__index = set
 
-function set.new()
+function set.new(...)
     local self = {}
     self.data = {}
     self.length = 0
-    
-    return setmetatable(self, set)
+
+    self = setmetatable(self, set)
+
+    local args = { ... }
+    for i = 1, #args do
+        local value = args[i]
+        self:add(value)
+    end
+
+    return self
 end
 
 function set:contain(value)
@@ -54,7 +62,7 @@ end
 function set:remove(value)
     lib.typeCheck(value, "string", "number", "boolean", "table")
     if not (self:contain(value)) then return end
-    
+
     self.data[value] = nil
     self.length = self.length - 1
 end
