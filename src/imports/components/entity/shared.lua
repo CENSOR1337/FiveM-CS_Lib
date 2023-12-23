@@ -68,9 +68,9 @@ function Entity.new(modelHash, position, rotation, entityType, isNetwork)
         elseif (entityType == typeEnum.OBJECT) then
             self.handle = CreateObjectNoOffset(self.model, self.position.x, self.position.y, self.position.z, self.isNetwork, false, false)
         end
-        self.onCreated:broadcast()
         self:setPosition(self.position)
         self:setRotation(self.rotation)
+        self.onCreated:broadcast()
     end)
 
     return self
