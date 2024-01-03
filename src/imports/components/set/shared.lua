@@ -87,7 +87,7 @@ function set:clear()
     self.length = 0
 end
 
-cslib_component.set = setmetatable({
+cslib_component = setmetatable({
     new = set.new,
     fromArray = set.fromArray,
 }, {
