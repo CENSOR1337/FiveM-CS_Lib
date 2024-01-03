@@ -17,6 +17,17 @@ function set.new(...)
     return self
 end
 
+function set.fromArray(array)
+    lib.typeCheck(array, "table")
+
+    local self = set.new()
+    for _, value in pairs(array) do
+        self:add(value)
+    end
+
+    return self
+end
+
 function set:contain(value)
     return self.data[value] ~= nil
 end
