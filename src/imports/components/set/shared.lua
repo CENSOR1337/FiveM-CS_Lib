@@ -89,6 +89,7 @@ end
 
 cslib_component.set = setmetatable({
     new = set.new,
+    fromArray = set.fromArray,
 }, {
     __call = function(_, ...)
         return set.new(...)
