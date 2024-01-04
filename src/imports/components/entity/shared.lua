@@ -93,6 +93,23 @@ function Entity:onCreated(callback)
     end)
 end
 
+function Entity:onDestroyed(callback)
+    lib.typeCheck(callback, "function")
+
+    -- Just call the callback if the entity is already destroyed
+    if (self.destroyed) then
+        callback()
+        return
+    end
+
+    -- Otherwise, listen for the entity to be destroyed
+    local dispatchId
+    dispatchId = self.onDestroyedDispatcher:add(function()
+        callback()
+        self.onDestroyedDispatcher:remove(dispatchId)
+    end)
+end
+
 function Entity:waitForCreation()
     local p = promise.new()
     self:onCreated(function()
