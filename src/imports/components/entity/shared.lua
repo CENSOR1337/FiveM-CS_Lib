@@ -52,8 +52,8 @@ function Entity.new(modelHash, position, rotation, entityType, isNetwork)
     self.isNetwork = isNetwork and true or false
     self.handle = 0
     self.destroyed = false
-    self.onCreated = lib.dispatcher()
-    self.onDestroyed = lib.dispatcher()
+    self.onCreatedDispatcher = lib.dispatcher()
+    self.onDestroyedDispatcher = lib.dispatcher()
 
     -- Init
     CreateThreadNow(function()
@@ -70,22 +70,33 @@ function Entity.new(modelHash, position, rotation, entityType, isNetwork)
         end
         self:setPosition(self.position)
         self:setRotation(self.rotation)
-        self.onCreated:broadcast()
+        self.onCreatedDispatcher:broadcast()
     end)
 
     return self
 end
 
+function Entity:onCreated(callback)
+    lib.typeCheck(callback, "function")
+
+    -- Just call the callback if the entity is already created
+    if (self:isValid()) then
+        callback()
+        return
+    end
+
+    -- Otherwise, listen for the entity to be created
+    local dispatchId
+    dispatchId = self.onCreatedDispatcher:add(function()
+        callback()
+        self.onCreatedDispatcher:remove(dispatchId)
+    end)
+end
+
 function Entity:waitForCreation()
     local p = promise.new()
-    if (self:isValid()) then
+    self:onCreated(function()
         p:resolve(true)
-        return CitizenAwait(p)
-    end
-    local dispatchId
-    dispatchId = self.onCreated:add(function()
-        p:resolve(true)
-        self.onCreated:remove(dispatchId)
     end)
     return CitizenAwait(p)
 end
@@ -118,7 +129,7 @@ end
 
 function Entity:destroy()
     self.destroyed = true
-    self.onDestroyed:broadcast()
+    self.onDestroyedDispatcher:broadcast()
     if not (self:isValid()) then return end
     DeleteEntity(self.handle)
 end
