@@ -28,6 +28,8 @@ end
 
 lib.isServer = isServer
 lib.bIsServer = isServer
+lib.isClient = not isServer
+lib.bIsClient = not isServer
 lib.on = AddEventHandler
 lib.off = RemoveEventHandler
 lib.emit = TriggerEvent
