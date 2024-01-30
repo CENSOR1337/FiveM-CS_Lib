@@ -112,4 +112,4 @@ local nui = setmetatable({}, {
     end,
 })
 
-cslib_component.nui = nui
+cslib_component = nui
