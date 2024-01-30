@@ -100,8 +100,6 @@ function metaIndex.setReady()
     onReadyDispatcher:broadcast()
 end
 
-metaIndex.on("ON_NUI_READY", metaIndex.setNuiReady)
-
 local nui = setmetatable({}, {
     __index = function(_, k)
         if (k == "isReady") then
