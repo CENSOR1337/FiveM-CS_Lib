@@ -1,17 +1,19 @@
 -- THIS IS STILL WORK IN PROGRESS USE WITH CAUTION
 
 local metaIndex = {}
-local isNuiReady = true -- TODO: implement NUI ready check
+local isNuiReady = false
 local onReadyDispatcher = lib.dispatcher()
 
---[[ TODO: implement NUI ready check
-nui.on("ON_NUI_READY", function(data)
-    isNuiReady = true
-    onReadyDispatcher:broadcast()
-end)
-]]
-
 --[[ JavaScript code for NUI communication
+
+fetch(`https://${GetParentResourceName()}/ON_NUI_READY`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({})
+})
+
 
 class NuiListener {
     eventname;
@@ -92,6 +94,13 @@ end
 function metaIndex.focus(hasFocus, hasCursor)
     SetNuiFocus(hasFocus, hasCursor)
 end
+
+function metaIndex.setNuiReady()
+    isNuiReady = true
+    onReadyDispatcher:broadcast()
+end
+
+metaIndex.on("ON_NUI_READY", metaIndex.setNuiReady)
 
 local nui = setmetatable({}, {
     __index = function(_, k)
