@@ -4,54 +4,6 @@ local metaIndex = {}
 local isNuiReady = false
 local onReadyDispatcher = lib.dispatcher()
 
---[[ JavaScript code for NUI communication
-
-fetch(`https://${GetParentResourceName()}/ON_NUI_READY`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({})
-})
-
-
-class NuiListener {
-    eventname;
-    listener;
-
-    constructor(eventname, listener) {
-        if (typeof eventname !== "string") throw new Error("eventname must be a string");
-        if (typeof listener !== "function") throw new Error("listener must be a function");
-
-        this.eventname = eventname;
-        this.listener = (event) => {
-            const data = event.data;
-            if (data.action !== this.eventname) return;
-            listener(...data.args || []);
-        }
-
-        window.addEventListener("message", this.listener);
-    }
-
-    destroy() {
-        if (!this.listener) return;
-        window.removeEventListener("message", this.listener);
-    }
-}
-
-class nui {
-    static register(eventname, listener) {
-        return new NuiListener(eventname, listener);
-    }
-
-    static destroy(listener) {
-        if (!listener) return;
-        listener.destroy();
-    }
-}
-
- ]]
-
 function metaIndex.emit(name, ...)
     lib.typeCheck(name, "string")
 
