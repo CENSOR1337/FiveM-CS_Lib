@@ -29,7 +29,8 @@ function metaIndex.on(name, listener)
     lib.typeCheck(listener, "function")
 
     RegisterNuiCallback(name, function(data, cb)
-        cb(listener(data) or {})
+        data = data or {}
+        cb(listener(table.unpack(data)))
     end)
 end
 
