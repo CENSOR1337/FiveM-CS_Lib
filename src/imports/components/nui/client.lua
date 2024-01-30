@@ -95,7 +95,7 @@ function metaIndex.focus(hasFocus, hasCursor)
     SetNuiFocus(hasFocus, hasCursor)
 end
 
-function metaIndex.setNuiReady()
+function metaIndex.setReady()
     isNuiReady = true
     onReadyDispatcher:broadcast()
 end
