@@ -1,69 +1,132 @@
-local resourceName = GetCurrentResourceName()
-local getResourceEventName = function(eventname)
-    return resourceName .. ":" .. eventname
+local Resource = {}
+Resource.__index = Resource
+
+function Resource:prefix(...)
+    local args = { ... }
+    table.insert(args, 1, self.name)
+    return table.concat(args, ":")
 end
 
-local callback = setmetatable({
-    register = function(eventname, listener)
-        eventname = getResourceEventName(eventname)
-        return lib.net.callback.register(eventname, listener)
-    end,
-    await = function(eventname, ...)
-        eventname = getResourceEventName(eventname)
-        return lib.net.callback.await(eventname, ...)
-    end,
-}, {
-    __call = function(_, eventname, cb, ...)
-        eventname = getResourceEventName(eventname)
-        return lib.net.callback(eventname, cb, ...)
-    end,
-})
+local ACallback = {}
+ACallback.__index = ACallback
+setmetatable(ACallback, Resource)
 
+function ACallback.new(resource)
+    local self = setmetatable({}, ACallback)
+    self.name = resource
 
-cslib_component.name = resourceName
-cslib_component.event = setmetatable({}, {
-    __call = function(t, eventname)
-        return getResourceEventName(eventname)
-    end,
-})
-cslib_component.onStop = function(cb)
-    return lib.on("onResourceStop", function(resource)
-        if resource ~= resourceName then return end
-        cb(resource)
+    return setmetatable(self, {
+        __index = function(_, field)
+            return setmetatable({}, {
+                __call = function(_, arg1, ...)
+                    if (arg1 == self) then
+                        return ACallback[field](arg1, ...)
+                    end
+
+                    return ACallback[field](self, arg1, ...)
+                end,
+            })
+        end,
+    })
+end
+
+local AResource = {}
+AResource.__index = AResource
+setmetatable(AResource, Resource)
+
+function AResource.new(resource)
+    local self = setmetatable({}, AResource)
+    self.name = resource
+    self.callback = ACallback.new(resource)
+
+    return setmetatable(self, {
+        __index = function(_, field)
+            return setmetatable({}, {
+                __call = function(_, arg1, ...)
+                    if (arg1 == self) then
+                        return AResource[field](arg1, ...)
+                    end
+
+                    return AResource[field](self, arg1, ...)
+                end,
+            })
+        end,
+    })
+end
+
+function AResource:prefix(...)
+    local args = { ... }
+    table.insert(args, 1, self.name)
+    return table.concat(args, ":")
+end
+
+function AResource:on(eventname, callback)
+    return lib.on(self:prefix(eventname), callback)
+end
+
+function AResource:once(eventname, callback)
+    return lib.once(self:prefix(eventname), callback)
+end
+
+function AResource:emit(eventname, ...)
+    return lib.emit(self:prefix(eventname), ...)
+end
+
+if (lib.isServer) then
+    function AResource:emitClient(eventname, client, ...)
+        return lib.emitClient(self:prefix(eventname), client, ...)
+    end
+
+    function AResource:emitAllClients(eventname, ...)
+        return lib.emitAllClients(self:prefix(eventname), ...)
+    end
+
+    function AResource:onClient(eventname, callback)
+        return lib.onClient(self:prefix(eventname), callback)
+    end
+
+    function AResource:onceClient(eventname, callback)
+        return lib.onceClient(self:prefix(eventname), callback)
+    end
+else
+    function AResource:emitServer(eventname, ...)
+        return lib.emitServer(self:prefix(eventname), ...)
+    end
+
+    function AResource:onServer(eventname, callback)
+        return lib.onServer(self:prefix(eventname), callback)
+    end
+
+    function AResource:onceServer(eventname, callback)
+        return lib.onceServer(self:prefix(eventname), callback)
+    end
+end
+
+function AResource:onStart(callback)
+    return lib.on("onResourceStart", function(startResource)
+        if (self.name ~= startResource) then return end
+        callback()
     end)
 end
-cslib_component.onStart = function(cb)
-    return lib.on("onResourceStart", function(resource)
-        if resource ~= resourceName then return end
-        cb(resource)
+
+function AResource:onStop(callback)
+    return lib.on("onResourceStop", function(stopResource)
+        if (self.name ~= stopResource) then return end
+        callback()
     end)
 end
-cslib_component.on = function(eventname, cb)
-    return lib.on(getResourceEventName(eventname), cb)
-end
-cslib_component.onNet = function(eventname, cb)
-    return lib.onNet(getResourceEventName(eventname), cb)
-end
-cslib_component.once = function(eventname, cb)
-    return lib.once(getResourceEventName(eventname), cb)
-end
-cslib_component.onceNet = function(eventname, cb)
-    return lib.onceNet(getResourceEventName(eventname), cb)
-end
-cslib_component.emit = function(eventname, ...)
-    return lib.emit(getResourceEventName(eventname), ...)
-end
-cslib_component.emitServer = (not lib.bIsServer) and function(eventname, ...)
-    return lib.emitServer(getResourceEventName(eventname), ...)
-end
-cslib_component.emitClient = (lib.bIsServer) and function(eventname, target, ...)
-    return lib.emitClient(getResourceEventName(eventname), target, ...)
-end
-cslib_component.emitAllClients = (lib.bIsServer) and function(eventname, ...)
-    return lib.emitAllClients(getResourceEventName(eventname), ...)
-end
-cslib_component.onServer = cslib_component.onNet
-cslib_component.onClient = cslib_component.onNet
-cslib_component.onceServer = cslib_component.onceNet
-cslib_component.onceClient = cslib_component.onceNet
-cslib_component.callback = callback
+
+local currentResource = AResource.new(GetCurrentResourceName())
+
+cslib_component = setmetatable({}, {
+    __index = function(t, resource)
+        return setmetatable({}, {
+            __index = function(_, key)
+                return AResource.new(resource)[key]
+            end,
+            __call = function(_, ...)
+                return currentResource[resource](...)
+            end,
+        })
+    end,
+})
