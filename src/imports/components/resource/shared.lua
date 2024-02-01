@@ -118,7 +118,9 @@ end
 
 local currentResource = AResource.new(GetCurrentResourceName())
 
-cslib_component = setmetatable({}, {
+cslib_component = setmetatable({
+    name = currentResource.name,
+}, {
     __index = function(t, resource)
         return setmetatable({}, {
             __index = function(_, key)
