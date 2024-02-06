@@ -61,7 +61,7 @@ local promise = promise
 local Await = Citizen.Await
 local table_unpack = table.unpack
 
-local prefix = "cslib.callback:"
+local prefix = "cslib.cb:"
 local timeoutTime = 10 * 1000
 
 local function registerCallback(eventname, listener)
@@ -103,18 +103,24 @@ local function triggerCallbackAwait(eventname, src, ...)
         local p = promise.new()
 
         triggerCallback(eventname, src, function(...)
-            p:resolve({ ... })
+            p:resolve({
+                success = true,
+                params = { ... },
+            })
         end, ...)
 
         lib.setTimeout(function()
-            p:resolve()
+            p:resolve({
+                success = false,
+            })
         end, timeoutTime)
 
         return Await(p)
     end
 
     local returnValues = handler(...)
-    return returnValues and table_unpack(returnValues)
+    if not (returnValues.success) then return end
+    return table_unpack(returnValues.params)
 end
 
 cslib_component.callback = setmetatable({
