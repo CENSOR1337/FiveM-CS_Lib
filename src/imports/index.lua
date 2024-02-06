@@ -90,3 +90,7 @@ end
 lib.randomUUID = lib.utils.randomUUID
 lib.export = lib.module.export
 lib.import = lib.module.import
+
+lib.init = function()
+    lib.time.getNetTime() -- client call, server register, a callback
+end
