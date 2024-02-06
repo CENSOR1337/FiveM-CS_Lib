@@ -7,29 +7,6 @@ function Resource:prefix(...)
     return table.concat(args, ":")
 end
 
-local ACallback = {}
-ACallback.__index = ACallback
-setmetatable(ACallback, Resource)
-
-function ACallback.new(resource)
-    local self = setmetatable({}, ACallback)
-    self.name = resource
-
-    return setmetatable(self, {
-        __index = function(_, field)
-            return setmetatable({}, {
-                __call = function(_, arg1, ...)
-                    if (arg1 == self) then
-                        return ACallback[field](arg1, ...)
-                    end
-
-                    return ACallback[field](self, arg1, ...)
-                end,
-            })
-        end,
-    })
-end
-
 local AResource = {}
 AResource.__index = AResource
 setmetatable(AResource, Resource)
@@ -37,10 +14,21 @@ setmetatable(AResource, Resource)
 function AResource.new(resource)
     local self = setmetatable({}, AResource)
     self.name = resource
-    self.callback = ACallback.new(resource)
+    self.callback = setmetatable({
+        register = function(eventname, ...)
+            return lib.net.callback.register(self:prefix(eventname), ...)
+        end,
+        await = function(eventname, ...)
+            return lib.net.callback.await(self:prefix(eventname), ...)
+        end,
+    }, {
+        __call = function(t, eventname, ...)
+            return lib.net.callback(self:prefix(eventname), ...)
+        end,
+    })
 
     return setmetatable(self, {
-        __index = function(_, field)
+        __index = function(t, field)
             return setmetatable({}, {
                 __call = function(_, arg1, ...)
                     if (arg1 == self) then
@@ -116,19 +104,18 @@ function AResource:onStop(callback)
     end)
 end
 
-local currentResource = AResource.new(GetCurrentResourceName())
+local instances = {}
+local resourceName = GetCurrentResourceName()
+instances[resourceName] = AResource.new(resourceName)
+
+local currentResource = AResource.new(resourceName)
 
 cslib_component = setmetatable({
-    name = currentResource.name,
+    get = function(resource)
+        return AResource.new(resource)
+    end,
 }, {
-    __index = function(t, resource)
-        return setmetatable({}, {
-            __index = function(_, key)
-                return AResource.new(resource)[key]
-            end,
-            __call = function(_, ...)
-                return currentResource[resource](...)
-            end,
-        })
+    __index = function(t, field)
+        return instances[resourceName][field]
     end,
 })
