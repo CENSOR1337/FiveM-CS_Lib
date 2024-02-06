@@ -102,12 +102,18 @@ local function triggerCallbackAwait(eventname, src, ...)
     local function handler(...)
         local p = promise.new()
 
-        triggerCallback(eventname, src, function(...)
+        local handler = function(...)
             p:resolve({
                 success = true,
                 params = { ... },
             })
-        end, ...)
+        end
+
+        if (lib.isServer) then
+            triggerCallback(eventname, src, handler, ...)
+        else
+            triggerCallback(eventname, handler, src, ...)
+        end
 
         lib.setTimeout(function()
             p:resolve({
