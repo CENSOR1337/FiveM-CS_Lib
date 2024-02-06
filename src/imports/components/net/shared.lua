@@ -55,3 +55,73 @@ function replication:destroy()
 end
 
 cslib_component.replicated = replication.new
+
+-- Callbacks
+local promise = promise
+local Await = Citizen.Await
+local table_unpack = table.unpack
+
+local prefix = "cslib.callback:"
+local timeoutTime = 10 * 1000
+
+local function registerCallback(eventname, listener)
+    local cbEventName = prefix .. eventname
+
+    return lib.onNet(cbEventName, function(id, ...)
+        local src = source
+
+        if (lib.isServer) then
+            lib.emitClient(id, src, listener(...))
+        else
+            lib.emitServer(id, listener(...))
+        end
+    end)
+end
+
+local function triggerCallback(eventname, src, listener, ...)
+    local callbackId = lib.randomUUID()
+    local cbEventName = prefix .. eventname
+
+    if (lib.isServer) then
+        lib.typeCheck(src, "number", "string")
+        lib.typeCheck(listener, "function", "table")
+
+        lib.onceClient(callbackId, listener)
+        lib.emitClient(cbEventName, src, callbackId, ...)
+    else
+        -- if client triggering server callback src or player id is not required
+        -- src is going to be listener
+        lib.typeCheck(src, "function", "table")
+
+        lib.onceServer(callbackId, src)
+        lib.emitServer(cbEventName, callbackId, listener, ...)
+    end
+end
+
+local function triggerCallbackAwait(eventname, src, ...)
+    local function handler(...)
+        local p = promise.new()
+
+        triggerCallback(eventname, src, function(...)
+            p:resolve({ ... })
+        end, ...)
+
+        lib.setTimeout(function()
+            p:resolve()
+        end, timeoutTime)
+
+        return Await(p)
+    end
+
+    local returnValues = handler(...)
+    return returnValues and table_unpack(returnValues)
+end
+
+cslib_component.callback = setmetatable({
+    register = registerCallback,
+    await = triggerCallbackAwait,
+}, {
+    __call = function(t, ...)
+        return triggerCallback(...)
+    end,
+})
