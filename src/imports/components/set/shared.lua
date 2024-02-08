@@ -4,6 +4,7 @@ set.__index = set
 function set.new(...)
     local self = {}
     self.data = {}
+    self.index = {}
     self.length = 0
 
     self = setmetatable(self, set)
@@ -29,7 +30,7 @@ function set.fromArray(array)
 end
 
 function set:contain(value)
-    return self.data[value] ~= nil
+    return self.index[value] ~= nil
 end
 
 function set:contains(...)
@@ -57,25 +58,35 @@ end
 
 function set:array()
     local array = {}
-    for value in pairs(self.data) do
-        array[#array + 1] = value
+    for i = 1, #self.data, 1 do
+        local value = self.data[i]
+        array[i] = value
     end
-    return array
+    return array -- return clone of data instead of reference
 end
 
 function set:add(value)
     lib.typeCheck(value, "string", "number", "boolean", "table")
 
-    self.data[value] = true
-    self.length = self.length + 1
+    table.insert(self.data, value)
+    self.index[value] = #self.data
 end
 
 function set:remove(value)
     lib.typeCheck(value, "string", "number", "boolean", "table")
     if not (self:contain(value)) then return end
 
-    self.data[value] = nil
-    self.length = self.length - 1
+    local index = self.index[value]
+    table.remove(self.data, index)
+
+    -- update index on remove
+    self.index = {}
+    for i = 1, #self.data do
+        local value = self.data[i]
+        if (value ~= nil) then
+            self.index[value] = i
+        end
+    end
 end
 
 function set:count()
