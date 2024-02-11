@@ -138,8 +138,8 @@ CollisionSphere.__index = CollisionSphere
 setmetatable(CollisionSphere, { __index = Collision })
 
 function CollisionSphere.new(position, radius, options)
-    lib.typeCheck(position, "vector3", "vector4", "table")
-    lib.typeCheck(radius, "number")
+    lib.assertType(position, "vector3", "vector4", "table")
+    lib.assertType(radius, "number")
 
     local self = setmetatable(Collision.new(position, options), CollisionSphere)
     self.radius = radius
@@ -166,7 +166,7 @@ function CollisionSphere:debugThread()
 end
 
 function CollisionSphere:setRadius(radius)
-    lib.typeCheck(radius, "number")
+    lib.assertType(radius, "number")
     self.radius = radius
 end
 

@@ -36,10 +36,10 @@ local classWarp = function(class, ...)
 end
 
 function Entity.new(modelHash, position, rotation, entityType, isNetwork)
-    lib.typeCheck(modelHash, "string", "number")
-    lib.typeCheck(position, "vector3", "vector4", "table")
-    lib.typeCheck(rotation, "vector3", "vector4", "table")
-    lib.typeCheck(isNetwork, "boolean", "nil")
+    lib.assertType(modelHash, "string", "number")
+    lib.assertType(position, "vector3", "vector4", "table")
+    lib.assertType(rotation, "vector3", "vector4", "table")
+    lib.assertType(isNetwork, "boolean", "nil")
 
     if (lib.bIsServer) then
         isNetwork = true
@@ -77,7 +77,7 @@ function Entity.new(modelHash, position, rotation, entityType, isNetwork)
 end
 
 function Entity:onCreated(callback)
-    lib.typeCheck(callback, "function")
+    lib.assertType(callback, "function")
 
     -- Just call the callback if the entity is already created
     if (self:isValid()) then
@@ -94,7 +94,7 @@ function Entity:onCreated(callback)
 end
 
 function Entity:onDestroyed(callback)
-    lib.typeCheck(callback, "function")
+    lib.assertType(callback, "function")
 
     -- Just call the callback if the entity is already destroyed
     if (self.destroyed) then
@@ -119,14 +119,14 @@ function Entity:waitForCreation()
 end
 
 function Entity:setPosition(position)
-    lib.typeCheck(position, "vector3", "vector4", "table")
+    lib.assertType(position, "vector3", "vector4", "table")
     self.position = vec(position.x, position.y, position.z)
     if not (self:isValid()) then return end
     SetEntityCoords(self.handle, self.position.x, self.position.y, self.position.z, false, false, false, false)
 end
 
 function Entity:setRotation(rotation)
-    lib.typeCheck(rotation, "vector3", "vector4", "table")
+    lib.assertType(rotation, "vector3", "vector4", "table")
     self.rotation = vec(rotation.x, rotation.y, rotation.z)
     if not (self:isValid()) then return end
     SetEntityRotation(self.handle, self.rotation.x, self.rotation.y, self.rotation.z, 0, false)

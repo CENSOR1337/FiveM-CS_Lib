@@ -5,7 +5,7 @@ local isNuiReady = false
 local onReadyDispatcher = lib.dispatcher()
 
 function metaIndex.emit(name, ...)
-    lib.typeCheck(name, "string")
+    lib.assertType(name, "string")
 
     local payload = {
         action = name,
@@ -25,8 +25,8 @@ function metaIndex.emit(name, ...)
 end
 
 function metaIndex.on(name, listener)
-    lib.typeCheck(name, "string")
-    lib.typeCheck(listener, "function")
+    lib.assertType(name, "string")
+    lib.assertType(listener, "function")
 
     RegisterNuiCallback(name, function(data, cb)
         data = data or {}
@@ -35,7 +35,7 @@ function metaIndex.on(name, listener)
 end
 
 function metaIndex.onReady(listener)
-    lib.typeCheck(listener, "function")
+    lib.assertType(listener, "function")
 
     if (isNuiReady) then
         listener()
