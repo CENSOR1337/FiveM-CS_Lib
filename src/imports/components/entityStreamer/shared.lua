@@ -69,6 +69,15 @@ function EnityStreamer.new(options)
     return self
 end
 
+function EnityStreamer:destroy()
+    lib.clearInterval(self.tickpool)
+end
+
+function EnityStreamer:setTypes(types)
+    lib.assertType(types, "table")
+    self.types = lib.set.fromArray(types)
+end
+
 function EnityStreamer:onTick(listener)
     lib.typeCheck(listener, "function", "table")
     return self.dispatcher:add(listener)
