@@ -24,10 +24,9 @@ function EnityStreamer.new(options)
     local self = setmetatable({}, EnityStreamer)
     self.types = lib.set.fromArray(options.types)
     self.tickRate = options.tickRate or 500
-    self.tickpool = lib.tickpool.new()
     self.dispatcher = lib.dispatcher.new()
 
-    self.tickpool:onTick(function()
+    self.tickpool = lib.setInterval(function()
         local entities = {}
 
         if (self.types:contain("object")) then
@@ -65,7 +64,7 @@ function EnityStreamer.new(options)
                 self.dispatcher:broadcast(processedEntity)
             end
         end
-    end)
+    end, self.tickRate)
 
     return self
 end
