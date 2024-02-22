@@ -7,7 +7,7 @@ local function getNonPlayerPeds()
     local count = 0
     for i = 1, #peds, 1 do
         local ped = peds[i]
-        if (not lib.game.isPedAPlayer(ped)) then
+        if (not IsPedAPlayer(ped)) then
             count += 1
             aiPeds[count] = ped
         end
