@@ -10,8 +10,8 @@ function timer.new(handler, delay, options)
     self.isLoop = (options.isLoop ~= nil) and options.isLoop or false
     self.fnHandler = handler
     self.handler = function()
-        if (self.bDestroyed) then return end
         Wait(self.delay)
+        if (self.bDestroyed) then return end
         self.fnHandler()
     end
 
