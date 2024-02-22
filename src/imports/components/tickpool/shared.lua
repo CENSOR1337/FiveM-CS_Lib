@@ -19,7 +19,7 @@ function tickpool.new(options)
 end
 
 function tickpool:add(fnHandler)
-    lib.typeCheck(fnHandler, "function", "table")
+    lib.assertType(fnHandler, "function", "table")
 
     self.key += 1
     self.handlers.fn[self.key] = fnHandler

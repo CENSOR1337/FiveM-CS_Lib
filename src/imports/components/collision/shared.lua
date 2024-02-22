@@ -5,6 +5,7 @@ function Collision.new(position, options)
     options = options or {}
     local self = setmetatable({}, Collision)
     self.position = vec(position.x, position.y, position.z)
+    self.localPlayerOnly = false
     self.playersOnly = false
     self.insideEntities = {}
     self.dimension = 0
@@ -80,6 +81,10 @@ function Collision:onTick()
 end
 
 function Collision:getRevelantEntities()
+    if (self.localPlayerOnly and lib.isClient) then
+        return { PlayerPedId() }
+    end
+
     if (self.playersOnly) then
         return lib.game.getPlayerPeds()
     end
@@ -138,8 +143,8 @@ CollisionSphere.__index = CollisionSphere
 setmetatable(CollisionSphere, { __index = Collision })
 
 function CollisionSphere.new(position, radius, options)
-    lib.typeCheck(position, "vector3", "vector4", "table")
-    lib.typeCheck(radius, "number")
+    lib.assertType(position, "vector3", "vector4", "table")
+    lib.assertType(radius, "number")
 
     local self = setmetatable(Collision.new(position, options), CollisionSphere)
     self.radius = radius
@@ -166,7 +171,7 @@ function CollisionSphere:debugThread()
 end
 
 function CollisionSphere:setRadius(radius)
-    lib.typeCheck(radius, "number")
+    lib.assertType(radius, "number")
     self.radius = radius
 end
 

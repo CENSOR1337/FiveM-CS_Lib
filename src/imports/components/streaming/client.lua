@@ -1,6 +1,6 @@
 local function requestAnimDict(animDict, cb)
-    lib.typeCheck(animDict, "string")
-    lib.typeCheck(cb, "function", "table")
+    lib.assertType(animDict, "string")
+    lib.assertType(cb, "function", "table")
 
     if not DoesAnimDictExist(animDict) then
         error(("animDict \"%s\" was not exist"):format(animDict))
@@ -39,8 +39,8 @@ local function requestAnimDictSync(animDict)
 end
 
 local function requestModel(model, cb)
-    lib.typeCheck(model, "string", "number")
-    lib.typeCheck(cb, "function", "table")
+    lib.assertType(model, "string", "number")
+    lib.assertType(cb, "function", "table")
 
     local modelStr
     if type(model) ~= "number" then

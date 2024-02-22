@@ -19,7 +19,7 @@ function set.new(...)
 end
 
 function set.fromArray(array)
-    lib.typeCheck(array, "table")
+    lib.assertType(array, "table")
 
     local self = set.new()
     for _, value in pairs(array) do
@@ -47,8 +47,8 @@ function set:append(...)
     local args = { ... }
     for i = 1, #args do
         local otherSet = args[i]
-        lib.typeCheck(otherSet, "table")
-        lib.typeCheck(otherSet.data, "table")
+        lib.assertType(otherSet, "table")
+        lib.assertType(otherSet.data, "table")
 
         for value in pairs(otherSet.data) do
             self:add(value)
@@ -66,14 +66,14 @@ function set:array()
 end
 
 function set:add(value)
-    lib.typeCheck(value, "string", "number", "boolean", "table")
+    lib.assertType(value, "string", "number", "boolean", "table")
 
     table.insert(self.data, value)
     self.index[value] = #self.data
 end
 
 function set:remove(value)
-    lib.typeCheck(value, "string", "number", "boolean", "table")
+    lib.assertType(value, "string", "number", "boolean", "table")
     if not (self:contain(value)) then return end
 
     local index = self.index[value]

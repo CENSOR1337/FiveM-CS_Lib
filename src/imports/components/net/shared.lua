@@ -83,15 +83,15 @@ local function triggerCallback(eventname, src, listener, ...)
     local cbEventName = prefix .. eventname
 
     if (lib.isServer) then
-        lib.typeCheck(src, "number", "string")
-        lib.typeCheck(listener, "function", "table")
+        lib.assertType(src, "number", "string")
+        lib.assertType(listener, "function", "table")
 
         lib.onceClient(callbackId, listener)
         lib.emitClient(cbEventName, src, callbackId, ...)
     else
         -- if client triggering server callback src or player id is not required
         -- src is going to be listener
-        lib.typeCheck(src, "function", "table")
+        lib.assertType(src, "function", "table")
 
         lib.onceServer(callbackId, src)
         lib.emitServer(cbEventName, callbackId, listener, ...)
