@@ -1,5 +1,5 @@
-local EnityStreamer = {}
-EnityStreamer.__index = EnityStreamer
+local EntityMonitor = {}
+EntityMonitor.__index = EntityMonitor
 
 local function getNonPlayerPeds()
     local peds = lib.game.getPeds()
@@ -15,13 +15,13 @@ local function getNonPlayerPeds()
     return aiPeds
 end
 
-function EnityStreamer.new(options)
+function EntityMonitor.new(options)
     lib.typeCheck(options, "table", "nil")
 
     options = options or {}
     options.types = options.types or { "ped", "vehicle", "object", "playerped" }
 
-    local self = setmetatable({}, EnityStreamer)
+    local self = setmetatable({}, EntityMonitor)
     self.types = lib.set.fromArray(options.types)
     self.tickRate = options.tickRate or 500
     self.dispatcher = lib.dispatcher.new()
@@ -69,24 +69,24 @@ function EnityStreamer.new(options)
     return self
 end
 
-function EnityStreamer:destroy()
+function EntityMonitor:destroy()
     lib.clearInterval(self.tickpool)
 end
 
-function EnityStreamer:setTypes(types)
+function EntityMonitor:setTypes(types)
     lib.assertType(types, "table")
     self.types = lib.set.fromArray(types)
 end
 
-function EnityStreamer:onTick(listener)
+function EntityMonitor:onTick(listener)
     lib.typeCheck(listener, "function", "table")
     return self.dispatcher:add(listener)
 end
 
 cslib_component = setmetatable({
-    new = EnityStreamer.new,
+    new = EntityMonitor.new,
 }, {
     __call = function()
-        return EnityStreamer.new()
+        return EntityMonitor.new()
     end,
 })
