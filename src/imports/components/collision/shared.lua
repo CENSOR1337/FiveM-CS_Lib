@@ -5,6 +5,7 @@ function Collision.new(position, options)
     options = options or {}
     local self = setmetatable({}, Collision)
     self.position = vec(position.x, position.y, position.z)
+    self.localPlayerOnly = false
     self.playersOnly = false
     self.insideEntities = {}
     self.dimension = 0
@@ -80,6 +81,10 @@ function Collision:onTick()
 end
 
 function Collision:getRevelantEntities()
+    if (self.localPlayerOnly and lib.isClient) then
+        return { PlayerPedId() }
+    end
+
     if (self.playersOnly) then
         return lib.game.getPlayerPeds()
     end
