@@ -8,24 +8,21 @@ cslib_component.sphere = setmetatable({
                 color = options.color,
             },
         })
-        collision.playersOnly = true
+        collision.localPlayerOnly = true
 
         collision:onBeginOverlap(function(other)
-            if (other ~= PlayerPedId()) then return end
             if (zoneObject.onBeginOverlap) then
                 zoneObject.onBeginOverlap(other)
             end
         end)
 
         collision:onOverlapping(function(other)
-            if (other ~= PlayerPedId()) then return end
             if (zoneObject.onOverlapping) then
                 zoneObject.onOverlapping(other)
             end
         end)
 
         collision:onEndOverlap(function(other)
-            if (other ~= PlayerPedId()) then return end
             if (zoneObject.onEndOverlap) then
                 zoneObject.onEndOverlap(other)
             end
@@ -39,7 +36,7 @@ cslib_component.sphere = setmetatable({
         zoneObject.isEntityInside = function(self, entity)
             return collision:isEntityInside(entity)
         end
-        
+
         zoneObject.destroy = function(self)
             collision:destroy()
         end
