@@ -5,6 +5,8 @@ local CitizenCreateThreadNow = Citizen.CreateThreadNow
 
 function timer.new(handler, delay, options)
     local self = {}
+    options = options or {}
+
     self.delay = delay or 0
     self.bDestroyed = false
     self.isLoop = (options.isLoop ~= nil) and options.isLoop or false
