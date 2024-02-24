@@ -1,3 +1,4 @@
+local reservedEntries = lib.set.fromArray({ "handle", "id" })
 local EntityMonitor = {}
 EntityMonitor.__index = EntityMonitor
 
@@ -25,6 +26,7 @@ function EntityMonitor.new(options)
     self.types = lib.set.fromArray(options.types)
     self.tickRate = options.tickRate or 500
     self.dispatcher = lib.dispatcher.new()
+    self.natives = {}
 
     self.tickpool = lib.setInterval(function()
         local entities = {}
@@ -45,23 +47,18 @@ function EntityMonitor.new(options)
             entities["playerped"] = lib.game.getPlayerPeds()
         end
 
-        for entityType, entityHandles in pairs(entities) do
+        for _, entityHandles in pairs(entities) do
             for i = 1, #entityHandles, 1 do
                 local entityHandle = entityHandles[i]
+                local entityInfo = {}
+                entityInfo.handle = entityHandle
 
-                local dimension = 0
-                if (cslib.isServer) then
-                    dimension = GetEntityRoutingBucket(entityHandle)
+                for entryName, nativeFn in pairs(self.natives) do
+                    local result = nativeFn(entityHandle)
+                    entityInfo[entryName] = result
                 end
 
-                local processedEntity = {
-                    entityType = entityType,
-                    position = GetEntityCoords(entityHandle),
-                    handle = entityHandle,
-                    dimension = dimension,
-                }
-
-                self.dispatcher:broadcast(processedEntity)
+                self.dispatcher:broadcast(entityInfo)
             end
         end
     end, self.tickRate)
@@ -83,6 +80,22 @@ function EntityMonitor:onTick(listener)
     return self.dispatcher:add(listener)
 end
 
+function EntityMonitor:registerGetter(entryName, nativeFn)
+    lib.assertType(entryName, "string")
+    lib.assertType(nativeFn, "function")
+    assert(not reservedEntries:contain(entryName), ("Entry name '%s' is reserved"):format(entryName))
+
+    self.natives[entryName] = nativeFn
+end
+
+function EntityMonitor:removeGetter(entryName)
+    lib.assertType(entryName, "string")
+
+    self.natives[entryName] = nil
+end
+
+EntityMonitor.unregisterGetter = EntityMonitor.removeGetter -- do i need this?
+
 cslib_component = setmetatable({
     new = EntityMonitor.new,
 }, {
@@ -90,3 +103,20 @@ cslib_component = setmetatable({
         return EntityMonitor.new()
     end,
 })
+
+
+--[[ This is an example of how to use the EntityMonitor component (TO BE REMOVED)
+
+local exampleMonitor = EntityMonitor.new({
+    types = { "playerped" },
+    tickRate = 500,
+})
+
+if (lib.isServer) then
+    exampleMonitor:addNative("position", GetEntityCoords)
+    exampleMonitor:addNative("dimension", GetEntityRoutingBucket)
+else
+    exampleMonitor:addNative("position", function(entity)
+        return GetEntityCoords(entity, false)
+    end)
+end ]]
