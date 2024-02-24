@@ -113,10 +113,10 @@ local exampleMonitor = EntityMonitor.new({
 })
 
 if (lib.isServer) then
-    exampleMonitor:addNative("position", GetEntityCoords)
-    exampleMonitor:addNative("dimension", GetEntityRoutingBucket)
+    exampleMonitor:registerGetter("position", GetEntityCoords)
+    exampleMonitor:registerGetter("dimension", GetEntityRoutingBucket)
 else
-    exampleMonitor:addNative("position", function(entity)
+    exampleMonitor:registerGetter("position", function(entity)
         return GetEntityCoords(entity, false)
     end)
 end ]]
