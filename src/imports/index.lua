@@ -54,7 +54,7 @@ lib.emitClient = isServer and function(eventName, playerId, ...)
     TriggerClientEvent(eventName, playerId, ...)
 end
 lib.emitAllClients = isServer and function(eventname, ...)
-    lib.emitClient(eventname, -1, ...)
+    TriggerClientEvent(eventname, -1, ...)
 end
 lib.onClient = isServer and RegisterNetEvent
 lib.onceClient = isServer and lib.onceNet
