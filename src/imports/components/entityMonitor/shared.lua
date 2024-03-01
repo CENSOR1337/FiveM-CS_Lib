@@ -47,8 +47,10 @@ function EntityMonitor.new(options)
             entities["playerped"] = lib.game.getPlayerPeds()
         end
 
+        local entityCount = 1
         for _, entityHandles in pairs(entities) do
             for i = 1, #entityHandles, 1 do
+                entityCount += 1
                 local entityHandle = entityHandles[i]
                 local entityInfo = {}
                 entityInfo.handle = entityHandle
@@ -58,7 +60,7 @@ function EntityMonitor.new(options)
                     entityInfo[entryName] = result
                 end
 
-                self.dispatcher:broadcast(entityInfo)
+                self.dispatcher:broadcast(entityInfo, { type = entityHandle, index = i, count = entityCount })
             end
         end
     end, self.tickRate)
