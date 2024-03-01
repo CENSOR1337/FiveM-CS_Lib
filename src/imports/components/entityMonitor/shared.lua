@@ -75,9 +75,14 @@ function EntityMonitor:setTypes(types)
     self.types = lib.set.fromArray(types)
 end
 
-function EntityMonitor:onTick(listener)
-    lib.typeCheck(listener, "function", "table")
+function EntityMonitor:onTick(listener) -- need to find a better name for this
+    lib.assertType(listener, "function")
     return self.dispatcher:add(listener)
+end
+
+function EntityMonitor:removeTick(id) -- need to find a better name for this
+    lib.assertType(id, "number")
+    self.dispatcher:remove(id)
 end
 
 function EntityMonitor:registerGetter(entryName, nativeFn)
