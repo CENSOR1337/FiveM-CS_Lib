@@ -1,3 +1,20 @@
+local entityMonitor = lib.EntityMonitor({
+    tickRate = 500,
+})
+
+if (lib.isServer) then
+    entityMonitor:registerGetter("position", GetEntityCoords)
+    entityMonitor:registerGetter("dimension", GetEntityRoutingBucket)
+else
+    entityMonitor:registerGetter("position", function(entity)
+        return GetEntityCoords(entity, false)
+    end)
+
+    entityMonitor:registerGetter("dimension", function(entity)
+        return 0
+    end)
+end
+
 local Collision = {}
 Collision.__index = Collision
 
@@ -16,9 +33,9 @@ function Collision.new(position, options)
     self.tickRate = 500
     self.destroyed = false
     self.tickpool = lib.tickpool.new()
-    self.interval = lib.setInterval(function()
-        self:onTick()
-    end, self.tickRate)
+    self.monitorTickId = entityMonitor:onTick(function(entityHandle)
+        self:onTick(entityHandle)
+    end)
     self.tickpoolIds = {}
     self.listeners = {
         enter = lib.dispatcher.new(),
@@ -48,35 +65,27 @@ function Collision.new(position, options)
     return self
 end
 
-function Collision:onTick()
-    if (self.destroyed) then
-        self.tickpool:destroy()
-        self.interval:destroy()
+--[[ NOTE:
+    1. check is entity is already overlapping
+    2. check if entity valid for collision conditions
+    3. on last tick, discard all entities that are not inside anymore
+ ]]
+function Collision:onTick(entity, entityInfo)
+    -- handle on first tick
+    if (entityInfo.count == 1) then
         for handle, _ in pairs(self.insideEntities) do
-            self.listeners.exit:broadcast(handle)
-        end
-        return
-    end
-
-    local entities = self:getRevelantEntities()
-
-    for handle, _ in pairs(self.insideEntities) do
-        local isValid = self:isEntityValid(handle)
-        if not (isValid) then
-            self.insideEntities[handle] = nil
-            self.listeners.exit:broadcast(handle)
-        end
-    end
-
-    for i = 1, #entities, 1 do
-        local handle = entities[i]
-        if not ((self.insideEntities[handle])) then
-            local isValid = self:isEntityValid(handle)
-            if (isValid) then
-                self.insideEntities[handle] = true
-                self.listeners.enter:broadcast(handle)
+            local isValid = self:isPositionInside()
+            if not (isValid) then
+                self.insideEntities[handle] = nil
+                self.listeners.exit:broadcast(handle)
             end
         end
+    end
+
+    local isValid = self:isPositionInside(entity.position) and self.dimension == entity.dimension
+    if (isValid) then
+        self.insideEntities[entity] = true
+        self.listeners.enter:broadcast(entity)
     end
 end
 
@@ -136,6 +145,12 @@ end
 
 function Collision:destroy()
     self.destroyed = true
+
+    self.tickpool:destroy()
+    entityMonitor:removeTick(self.monitorTickId)
+    for handle, _ in pairs(self.insideEntities) do
+        self.listeners.exit:broadcast(handle)
+    end
 end
 
 local CollisionSphere = {}
