@@ -87,6 +87,12 @@ function EntityMonitor:unsubscribe(id)
     self.dispatcher:remove(id)
 end
 
+-- TODO: implement onBeginTick, onTick, onEndTick, off
+function EntityMonitor:onTick(listener)
+    lib.assertType(listener, "function")
+    return self.dispatcher:add(listener)
+end
+
 function EntityMonitor:registerGetter(entryName, propertyGetter)
     lib.assertType(entryName, "string")
     lib.assertType(propertyGetter, "function")
