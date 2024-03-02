@@ -95,6 +95,7 @@ end
 
 function set:clear()
     self.data = {}
+    self.index = {}
     self.length = 0
 end
 
