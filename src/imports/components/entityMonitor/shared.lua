@@ -55,8 +55,8 @@ function EntityMonitor.new(options)
                 local entityInfo = {}
                 entityInfo.handle = entityHandle
 
-                for entryName, nativeFn in pairs(self.natives) do
-                    local result = nativeFn(entityHandle)
+                for entryName, propertyGetter in pairs(self.natives) do
+                    local result = propertyGetter(entityHandle)
                     entityInfo[entryName] = result
                 end
 
@@ -87,12 +87,12 @@ function EntityMonitor:removeTick(id) -- need to find a better name for this
     self.dispatcher:remove(id)
 end
 
-function EntityMonitor:registerGetter(entryName, nativeFn)
+function EntityMonitor:registerGetter(entryName, propertyGetter)
     lib.assertType(entryName, "string")
-    lib.assertType(nativeFn, "function")
+    lib.assertType(propertyGetter, "function")
     assert(not reservedEntries:contain(entryName), ("Entry name '%s' is reserved"):format(entryName))
 
-    self.natives[entryName] = nativeFn
+    self.natives[entryName] = propertyGetter
 end
 
 function EntityMonitor:removeGetter(entryName)
