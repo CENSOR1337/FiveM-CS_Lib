@@ -20,7 +20,8 @@ function Collision.new(position, options)
     self.position = vec(position.x, position.y, position.z)
     self.localPlayerOnly = false
     self.playersOnly = false
-    self.insideEntities = {}
+    self.insideEntities = cslib.set.new()
+    self.validatedEntities = cslib.set.new()
     self.dimension = 0
     self.debug = {
         enabled = (options.debug and options.debug.enabled) or false,
@@ -29,8 +30,8 @@ function Collision.new(position, options)
     self.tickRate = 500
     self.destroyed = false
     self.tickpool = lib.tickpool.new()
-    self.monitorTickId = entityMonitor:onTick(function(entityHandle)
-        self:onTick(entityHandle)
+    self.monitorTickId = entityMonitor:onTick(function(...)
+        self:onTick(...)
     end)
     self.tickpoolIds = {}
     self.listeners = {
@@ -61,27 +62,34 @@ function Collision.new(position, options)
     return self
 end
 
---[[ NOTE:
-    1. check is entity is already overlapping
-    2. check if entity valid for collision conditions
-    3. on last tick, discard all entities that are not inside anymore
- ]]
-function Collision:onTick(entity, entityInfo)
-    -- handle on first tick
-    if (entityInfo.count == 1) then
-        for handle, _ in pairs(self.insideEntities) do
-            local isValid = self:isPositionInside()
-            if not (isValid) then
-                self.insideEntities[handle] = nil
+function Collision:onTick(entity, monitorInfo)
+    local handle = entity.handle
+
+    -- check conditions
+    local isInside = self:isPositionInside(entity.position)
+    local isSameDimension = (self.dimension == (entity.dimension or self.dimension))
+    local isValid = isInside and isSameDimension
+
+    if (isValid) then
+        if not (self.insideEntities:contain(handle)) then
+            self.validatedEntities:add(handle)
+            self.insideEntities:add(handle)
+            self.listeners.enter:broadcast(handle)
+        end
+
+        self.validatedEntities:add(handle)
+    end
+
+    -- Discard all entities that are not inside anymore, (only after interated through all entities)
+    if (monitorInfo.index == monitorInfo.count) then
+        for _, handle in pairs(self.insideEntities:array()) do
+            if not (self.validatedEntities:contain(handle)) then
+                self.insideEntities:remove(handle)
                 self.listeners.exit:broadcast(handle)
             end
         end
-    end
 
-    local isValid = self:isPositionInside(entity.position) and self.dimension == entity.dimension
-    if (isValid) then
-        self.insideEntities[entity] = true
-        self.listeners.enter:broadcast(entity)
+        self.validatedEntities:clear()
     end
 end
 
