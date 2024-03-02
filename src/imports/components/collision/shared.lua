@@ -1,4 +1,4 @@
-local entityMonitor = lib.EntityMonitor({
+local entityMonitor = lib.entityMonitor({
     tickRate = 500,
 })
 
