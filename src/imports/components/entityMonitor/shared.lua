@@ -101,6 +101,11 @@ function EntityMonitor:removeGetter(entryName)
     self.natives[entryName] = nil
 end
 
+function EntityMonitor:hasGetter(entryName)
+    lib.assertType(entryName, "string")
+    return (self.natives[entryName] ~= nil)
+end
+
 EntityMonitor.unregisterGetter = EntityMonitor.removeGetter -- do i need this?
 
 cslib_component = setmetatable({
