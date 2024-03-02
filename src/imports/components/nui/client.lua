@@ -30,7 +30,7 @@ function metaIndex.on(name, listener)
 
     RegisterNuiCallback(name, function(data, cb)
         data = data or {}
-        cb(listener(table.unpack(data)))
+        cb(listener(table.unpack(data)) or 1)
     end)
 end
 
