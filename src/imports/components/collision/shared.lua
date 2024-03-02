@@ -9,10 +9,6 @@ else
     entityMonitor:registerGetter("position", function(entity)
         return GetEntityCoords(entity, false)
     end)
-
-    entityMonitor:registerGetter("dimension", function(entity)
-        return 0
-    end)
 end
 
 local Collision = {}
