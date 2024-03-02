@@ -80,38 +80,8 @@ lib.clearOnTick = function(key)
     baseTickPool:clearOnTick(key)
 end
 
-lib.validateType = function(value, ...)
-    local types = { ... }
-    if (#types == 0) then return true end
-
-    local mapType = {}
-    for i = 1, #types, 1 do
-        local validateType = types[i]
-        assert(type(validateType) == "string", "bad argument types, only expected string") -- should never use anyhing else than string
-        mapType[validateType] = true
-    end
-
-    local valueType = type(value)
-
-    local matches = (mapType[valueType] ~= nil)
-
-    if not (matches) then
-        local requireTypes = table.concat(types, " or ")
-        local errorMessage = ("bad value (%s expected, got %s)"):format(requireTypes, valueType)
-
-        return false, errorMessage
-    end
-
-    return true
-end
-
-lib.assertType = function(...)
-    local matches, errorMessage = lib.validateType(...)
-
-    assert(matches, errorMessage)
-
-    return matches
-end
+lib.validateType = lib.validate.type
+lib.assertType = lib.validate.type.assert
 
 lib.typeCheck = lib.assertType -- Mask as DEPRECATED, use assertType instead
 
