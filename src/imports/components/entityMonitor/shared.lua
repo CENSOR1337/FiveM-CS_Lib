@@ -77,12 +77,12 @@ function EntityMonitor:setTypes(types)
     self.types = lib.set.fromArray(types)
 end
 
-function EntityMonitor:onTick(listener) -- need to find a better name for this
+function EntityMonitor:subscribe(listener)
     lib.assertType(listener, "function")
     return self.dispatcher:add(listener)
 end
 
-function EntityMonitor:removeTick(id) -- need to find a better name for this
+function EntityMonitor:unsubscribe(id)
     lib.assertType(id, "number")
     self.dispatcher:remove(id)
 end
@@ -95,7 +95,7 @@ function EntityMonitor:registerGetter(entryName, propertyGetter)
     self.natives[entryName] = propertyGetter
 end
 
-function EntityMonitor:removeGetter(entryName)
+function EntityMonitor:unregisterGetter(entryName)
     lib.assertType(entryName, "string")
 
     self.natives[entryName] = nil
@@ -105,8 +105,6 @@ function EntityMonitor:hasGetter(entryName)
     lib.assertType(entryName, "string")
     return (self.natives[entryName] ~= nil)
 end
-
-EntityMonitor.unregisterGetter = EntityMonitor.removeGetter -- do i need this?
 
 cslib_component = setmetatable({
     new = EntityMonitor.new,
