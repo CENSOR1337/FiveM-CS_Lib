@@ -24,44 +24,50 @@ function EntityMonitor.new(options)
 
     local self = setmetatable({}, EntityMonitor)
     self.types = lib.set.fromArray(options.types)
-    self.tickRate = options.tickRate or 500
+    self.tickRate = options.tickRate or (lib.isClient and 200 or 600)
     self.dispatcher = lib.dispatcher.new()
     self.natives = {}
 
     self.tickpool = lib.setInterval(function()
-        local entities = {}
+        local pools = {}
 
         if (self.types:contain("object")) then
-            entities["object"] = lib.game.getObjects()
+            pools["object"] = lib.game.getObjects()
         end
 
         if (self.types:contain("ped")) then
-            entities["ped"] = getNonPlayerPeds()
+            pools["ped"] = getNonPlayerPeds()
         end
 
         if (self.types:contain("vehicle")) then
-            entities["vehicle"] = lib.game.getVehicles()
+            pools["vehicle"] = lib.game.getVehicles()
         end
 
         if (self.types:contain("playerped")) then
-            entities["playerped"] = lib.game.getPlayerPeds()
+            pools["playerped"] = lib.game.getPlayerPeds()
         end
 
-        local entityCount = 1
-        for _, entityHandles in pairs(entities) do
+        -- merge all pools into one
+        local entities = {}
+        for _, entityHandles in pairs(pools) do
             for i = 1, #entityHandles, 1 do
-                entityCount += 1
-                local entityHandle = entityHandles[i]
-                local entityInfo = {}
-                entityInfo.handle = entityHandle
-
-                for entryName, propertyGetter in pairs(self.natives) do
-                    local result = propertyGetter(entityHandle)
-                    entityInfo[entryName] = result
-                end
-
-                self.dispatcher:broadcast(entityInfo, { type = entityHandle, index = i, count = entityCount })
+                entities[#entities + 1] = entityHandles[i]
             end
+        end
+
+        -- iterate through all entities and get their properties
+        local entityCount = #entities
+        for i = 1, entityCount, 1 do
+            local entityHandle = entities[i]
+            local entityInfo = {}
+            entityInfo.handle = entityHandle
+
+            for entryName, propertyGetter in pairs(self.natives) do
+                local result = propertyGetter(entityHandle)
+                entityInfo[entryName] = result
+            end
+
+            self.dispatcher:broadcast(entityInfo, { type = entityHandle, index = i, count = entityCount })
         end
     end, self.tickRate)
 
