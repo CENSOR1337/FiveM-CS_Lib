@@ -49,9 +49,9 @@ function EntityMonitor.new(options)
 
         -- merge all pools into one
         local entities = {}
-        for _, entityHandles in pairs(pools) do
+        for poolType, entityHandles in pairs(pools) do
             for i = 1, #entityHandles, 1 do
-                entities[#entities + 1] = entityHandles[i]
+                entities[#entities + 1] = { handle = entityHandles[i], type = poolType }
             end
         end
 

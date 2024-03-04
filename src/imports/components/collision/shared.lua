@@ -41,6 +41,7 @@ function Collision.new(position, options)
     }
 
     self:onBeginOverlap(function(handle)
+        -- TODO: dont add tick if no listeners
         self.tickpoolIds[handle] = self.tickpool:onTick(function()
             self.listeners.overlap:broadcast(handle)
         end)
