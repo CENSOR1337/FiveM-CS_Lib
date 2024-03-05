@@ -46,3 +46,5 @@ class nui {
         listener.destroy();
     }
 }
+
+cslib = { nui: nui }
