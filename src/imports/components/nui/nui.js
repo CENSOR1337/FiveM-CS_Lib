@@ -32,7 +32,7 @@ class nui {
     }
 
     static emit(eventname, ...args) {
-        fetch(`https://${resourceName}/${eventname}`, {
+        return fetch(`https://${resourceName}/${eventname}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json; charset=UTF-8",
@@ -46,3 +46,5 @@ class nui {
         listener.destroy();
     }
 }
+
+cslib = { nui: nui }

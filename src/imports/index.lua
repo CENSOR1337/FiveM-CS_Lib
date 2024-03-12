@@ -45,7 +45,7 @@ end
 -- Server
 lib.registerServerCallback = lib.net.registerServerCallback
 lib.emitClient = isServer and function(eventName, playerId, ...)
-    playerId = type("number") and playerId or tostring(playerId)
+    playerId = type("number") and playerId or tonumber(playerId)
 
     if (playerId <= 0) then
         error("cslib: [emitClient] with -1 is not allowed, use emitAllClients instead")
