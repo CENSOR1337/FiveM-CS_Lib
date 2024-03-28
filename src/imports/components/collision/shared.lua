@@ -1,6 +1,4 @@
-local entityMonitor = lib.entityMonitor({
-    tickRate = 500,
-})
+local entityMonitor = lib.entityMonitor({})
 
 if (lib.isServer) then
     entityMonitor:registerGetter("position", GetEntityCoords)
@@ -30,7 +28,7 @@ function Collision.new(position, options)
     self.tickRate = 500
     self.destroyed = false
     self.tickpool = lib.tickpool.new()
-    self.monitorTickId = entityMonitor:onTick(function(...)
+    self.monitorTickId = entityMonitor:subscribe(function(...)
         self:onTick(...)
     end)
     self.tickpoolIds = {}
@@ -39,17 +37,13 @@ function Collision.new(position, options)
         overlap = lib.dispatcher.new(),
         exit = lib.dispatcher.new(),
     }
-
-    self:onBeginOverlap(function(handle)
-        -- TODO: dont add tick if no listeners
-        self.tickpoolIds[handle] = self.tickpool:onTick(function()
-            self.listeners.overlap:broadcast(handle)
-        end)
-    end)
+    self.onOverlapId = nil
 
     self:onEndOverlap(function(handle)
-        self.tickpool:remove(self.tickpoolIds[handle])
-        self.tickpoolIds[handle] = nil
+        if (self.tickpoolIds[handle]) then
+            self.tickpool:remove(self.tickpoolIds[handle])
+            self.tickpoolIds[handle] = nil
+        end
     end)
 
     if (self.debug and self.debug.enabled) then
@@ -130,6 +124,15 @@ end
 
 function Collision:onOverlapping(listener)
     local id = self.listeners.overlap:add(listener)
+
+    if (self.listeners.overlap:size() == 1) then
+        self.onOverlapId = self:onBeginOverlap(function(handle)
+            self.tickpoolIds[handle] = self.tickpool:onTick(function()
+                self.listeners.overlap:broadcast(handle)
+            end)
+        end)
+    end
+
     return { id = id, type = "overlap" }
 end
 
@@ -145,14 +148,22 @@ function Collision:off(listenerInfo)
         self.listeners.exit:remove(listenerInfo.id)
     elseif (listenerInfo.type == "overlap") then
         self.listeners.overlap:remove(listenerInfo.id)
+        if (self.listeners.overlap:size() == 0) then
+            self.listeners.enter:remove(self.onOverlapId.id)
+        end
     end
 end
 
 function Collision:destroy()
+    if (self.destroyed) then return end
     self.destroyed = true
 
     self.tickpool:destroy()
-    entityMonitor:removeTick(self.monitorTickId)
+
+    if (self.monitorTickId) then
+        entityMonitor:unsubscribe(self.monitorTickId)
+    end
+
     for handle, _ in pairs(self.insideEntities) do
         self.listeners.exit:broadcast(handle)
     end
