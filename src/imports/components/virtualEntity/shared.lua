@@ -101,9 +101,23 @@ function VirtualEntity:new(...)
             self:destroy()
         end)
 
+        lib.resource.onServer(("%s:%s"):format(self.__eventname.onSyncedMetaChange, self.id), function(key, value)
+            self.syncedMeta[key] = value
+
+            if (self.onSyncedMetaChange) then
+                self:onSyncedMetaChange(key, value)
+            end
+        end)
+
         if (self.onStreamIn) then
             self:onStreamIn()
         end
+
+        cslib.resource.onStop(function()
+            if (self.onStreamOut) then
+                self:onStreamOut()
+            end
+        end)
     end
 
     return self
