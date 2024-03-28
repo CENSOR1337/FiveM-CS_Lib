@@ -24,42 +24,50 @@ function EntityMonitor.new(options)
 
     local self = setmetatable({}, EntityMonitor)
     self.types = lib.set.fromArray(options.types)
-    self.tickRate = options.tickRate or 500
+    self.tickRate = options.tickRate or (lib.isClient and 200 or 600)
     self.dispatcher = lib.dispatcher.new()
     self.natives = {}
 
     self.tickpool = lib.setInterval(function()
-        local entities = {}
+        local pools = {}
 
         if (self.types:contain("object")) then
-            entities["object"] = lib.game.getObjects()
+            pools["object"] = lib.game.getObjects()
         end
 
         if (self.types:contain("ped")) then
-            entities["ped"] = getNonPlayerPeds()
+            pools["ped"] = getNonPlayerPeds()
         end
 
         if (self.types:contain("vehicle")) then
-            entities["vehicle"] = lib.game.getVehicles()
+            pools["vehicle"] = lib.game.getVehicles()
         end
 
         if (self.types:contain("playerped")) then
-            entities["playerped"] = lib.game.getPlayerPeds()
+            pools["playerped"] = lib.game.getPlayerPeds()
         end
 
-        for _, entityHandles in pairs(entities) do
+        -- merge all pools into one
+        local entities = {}
+        for poolType, entityHandles in pairs(pools) do
             for i = 1, #entityHandles, 1 do
-                local entityHandle = entityHandles[i]
-                local entityInfo = {}
-                entityInfo.handle = entityHandle
-
-                for entryName, nativeFn in pairs(self.natives) do
-                    local result = nativeFn(entityHandle)
-                    entityInfo[entryName] = result
-                end
-
-                self.dispatcher:broadcast(entityInfo)
+                entities[#entities + 1] = { handle = entityHandles[i], type = poolType }
             end
+        end
+
+        -- iterate through all entities and get their properties
+        local entityCount = #entities
+        for i = 1, entityCount, 1 do
+            local entityHandle = entities[i].handle
+            local entityInfo = {}
+            entityInfo.handle = entityHandle
+
+            for entryName, propertyGetter in pairs(self.natives) do
+                local result = propertyGetter(entityHandle)
+                entityInfo[entryName] = result
+            end
+
+            self.dispatcher:broadcast(entityInfo, { type = entityHandle, index = i, count = entityCount })
         end
     end, self.tickRate)
 
@@ -75,26 +83,40 @@ function EntityMonitor:setTypes(types)
     self.types = lib.set.fromArray(types)
 end
 
-function EntityMonitor:onTick(listener)
-    lib.typeCheck(listener, "function", "table")
+function EntityMonitor:subscribe(listener)
+    lib.assertType(listener, "function")
     return self.dispatcher:add(listener)
 end
 
-function EntityMonitor:registerGetter(entryName, nativeFn)
-    lib.assertType(entryName, "string")
-    lib.assertType(nativeFn, "function")
-    assert(not reservedEntries:contain(entryName), ("Entry name '%s' is reserved"):format(entryName))
-
-    self.natives[entryName] = nativeFn
+function EntityMonitor:unsubscribe(id)
+    lib.assertType(id, "number")
+    self.dispatcher:remove(id)
 end
 
-function EntityMonitor:removeGetter(entryName)
+-- TODO: implement onBeginTick, onTick, onEndTick, off
+function EntityMonitor:onTick(listener)
+    lib.assertType(listener, "function")
+    return self.dispatcher:add(listener)
+end
+
+function EntityMonitor:registerGetter(entryName, propertyGetter)
+    lib.assertType(entryName, "string")
+    lib.assertType(propertyGetter, "function")
+    assert(not reservedEntries:contain(entryName), ("Entry name '%s' is reserved"):format(entryName))
+
+    self.natives[entryName] = propertyGetter
+end
+
+function EntityMonitor:unregisterGetter(entryName)
     lib.assertType(entryName, "string")
 
     self.natives[entryName] = nil
 end
 
-EntityMonitor.unregisterGetter = EntityMonitor.removeGetter -- do i need this?
+function EntityMonitor:hasGetter(entryName)
+    lib.assertType(entryName, "string")
+    return (self.natives[entryName] ~= nil)
+end
 
 cslib_component = setmetatable({
     new = EntityMonitor.new,
