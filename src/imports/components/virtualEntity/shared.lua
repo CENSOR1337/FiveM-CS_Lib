@@ -133,4 +133,8 @@ function VirtualEntity:setSyncedMeta(key, value)
     end
 end
 
+function VirtualEntity:getSyncedMeta(key)
+    return self.syncedMeta[key]
+end
+
 cslib_component = VirtualEntity
