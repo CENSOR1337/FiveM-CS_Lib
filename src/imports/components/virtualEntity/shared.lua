@@ -35,8 +35,7 @@ function VirtualEntity:new(...)
     else
         id = args[1]
         position = args[2]
-        streamDistance = args[3]
-        syncedMeta = args[4]
+        syncedMeta = args[3]
     end
 
     lib.typeCheck(id, "string")
