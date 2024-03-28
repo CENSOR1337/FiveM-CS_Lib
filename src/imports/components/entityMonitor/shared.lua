@@ -58,7 +58,7 @@ function EntityMonitor.new(options)
         -- iterate through all entities and get their properties
         local entityCount = #entities
         for i = 1, entityCount, 1 do
-            local entityHandle = entities[i]
+            local entityHandle = entities[i].handle
             local entityInfo = {}
             entityInfo.handle = entityHandle
 
