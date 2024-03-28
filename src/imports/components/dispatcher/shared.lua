@@ -8,6 +8,10 @@ function Dispatcher.new()
     return self
 end
 
+function Dispatcher:size()
+    return #self.listeners
+end
+
 function Dispatcher:add(listener)
     self.listenerId = self.listenerId + 1
     local listenerInfo = {
