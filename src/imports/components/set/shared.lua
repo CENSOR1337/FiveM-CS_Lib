@@ -5,7 +5,7 @@ function set.new(...)
     local self = {}
     self.data = {}
     self.index = {}
-    self.length = 0
+    self.size = 0
 
     self = setmetatable(self, set)
 
@@ -70,6 +70,7 @@ function set:add(value)
 
     table.insert(self.data, value)
     self.index[value] = #self.data
+    self.size = self.size + 1
 end
 
 function set:remove(value)
@@ -78,6 +79,8 @@ function set:remove(value)
 
     local index = self.index[value]
     table.remove(self.data, index)
+
+    self.size = self.size - 1
 
     -- update index on remove
     self.index = {}
@@ -89,14 +92,14 @@ function set:remove(value)
     end
 end
 
-function set:count()
-    return self.length
+function set:num()
+    return self.size
 end
 
 function set:clear()
     self.data = {}
     self.index = {}
-    self.length = 0
+    self.size = 0
 end
 
 cslib_component = setmetatable({
