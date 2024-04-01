@@ -66,8 +66,8 @@ local timeoutTime = 10 * 1000
 
 local function registerCallback(eventname, listener)
     local cbEventName = prefix .. eventname
-
-    return lib.onNet(cbEventName, function(id, ...)
+    local bind = lib.isServer and lib.onClient or lib.onServer
+    return bind(cbEventName, function(id, ...)
         local src = source
 
         if (lib.isServer) then

@@ -33,7 +33,6 @@ lib.bIsClient = not isServer
 lib.on = AddEventHandler
 lib.off = RemoveEventHandler
 lib.emit = TriggerEvent
-lib.onNet = RegisterNetEvent
 lib.once = function(eventname, listener)
     return bindOnce(false, eventname, listener)
 end

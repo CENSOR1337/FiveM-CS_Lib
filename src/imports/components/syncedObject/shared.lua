@@ -118,7 +118,7 @@ function CreateCSyncedObject(classname)
                 end
             end
         end
-        lib.resource.onNet(("rep:%s:refresh"):format(self.__classname), refreshObject)
+        lib.resource.onServer(("rep:%s:refresh"):format(self.__classname), refreshObject)
         CreateThread(refreshObject)
     end
 
