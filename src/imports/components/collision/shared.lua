@@ -62,7 +62,7 @@ function Collision.new(position, options)
 end
 
 function Collision:init()
-    if (self.debug or self.debug.enabled) then
+    if (self.debug and self.debug.enabled) then
         if (self.debugThread) then
             self:debugThread()
         end
