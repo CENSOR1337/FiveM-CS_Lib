@@ -1,12 +1,22 @@
 local entityMonitor = lib.entityMonitor({})
+local playerMonitor = lib.entityMonitor({ types = { "playerped" } })
+local localPlayerMonitor = lib.isClient and lib.entityMonitor({ types = { "localplayerped" } }) or nil
 
 if (lib.isServer) then
-    entityMonitor:registerGetter("position", GetEntityCoords)
-    entityMonitor:registerGetter("dimension", GetEntityRoutingBucket)
+    for _, monitor in pairs({ entityMonitor, playerMonitor, localPlayerMonitor }) do
+        if (monitor) then
+            monitor:registerGetter("position", GetEntityCoords)
+            monitor:registerGetter("dimension", GetEntityRoutingBucket)
+        end
+    end
 else
-    entityMonitor:registerGetter("position", function(entity)
-        return GetEntityCoords(entity, false)
-    end)
+    for _, monitor in pairs({ entityMonitor, playerMonitor, localPlayerMonitor }) do
+        if (monitor) then
+            monitor:registerGetter("position", function(entity)
+                return GetEntityCoords(entity, false)
+            end)
+        end
+    end
 end
 
 local Collision = {}
@@ -28,9 +38,7 @@ function Collision.new(position, options)
     self.tickRate = 500
     self.destroyed = false
     self.tickpool = lib.tickpool.new()
-    self.monitorTickId = entityMonitor:subscribe(function(...)
-        self:onTick(...)
-    end)
+    self.monitorTickId = -1
     self.tickpoolIds = {}
     self.listeners = {
         enter = lib.dispatcher.new(),
@@ -46,15 +54,35 @@ function Collision.new(position, options)
         end
     end)
 
-    if (self.debug and self.debug.enabled) then
-        CreateThread(function() -- Wait for child class to be initialized
-            if (self.debugThread) then
-                self:debugThread()
-            end
-        end)
-    end
+    CreateThread(function() -- Wait for child class to be initialized
+        self:init()
+    end)
 
     return self
+end
+
+function Collision:init()
+    if (self.debug or self.debug.enabled) then
+        if (self.debugThread) then
+            self:debugThread()
+        end
+    end
+
+    local desiredMonitor = entityMonitor
+
+    if (self.localPlayerOnly and lib.isClient) then
+        desiredMonitor = localPlayerMonitor
+    end
+
+    if (self.playersOnly) then
+        desiredMonitor = playerMonitor
+    end
+
+    if (desiredMonitor) then
+        self.monitorTickId = desiredMonitor:subscribe(function(...)
+            self:onTick(...)
+        end)
+    end
 end
 
 function Collision:onTick(entity, monitorInfo)
@@ -62,7 +90,10 @@ function Collision:onTick(entity, monitorInfo)
 
     -- check conditions
     local isInside = self:isPositionInside(entity.position)
-    local isSameDimension = (self.dimension == (entity.dimension or self.dimension))
+    local isSameDimension = true
+    if (type(self.dimension) == "number") then
+        isSameDimension = (self.dimension == (entity.dimension or self.dimension))
+    end
     local isValid = isInside and isSameDimension
 
     if (isValid) then
@@ -86,27 +117,6 @@ function Collision:onTick(entity, monitorInfo)
 
         self.validatedEntities:clear()
     end
-end
-
-function Collision:getRevelantEntities()
-    if (self.localPlayerOnly and lib.isClient) then
-        return { PlayerPedId() }
-    end
-
-    if (self.playersOnly) then
-        return lib.game.getPlayerPeds()
-    end
-
-    return lib.game.getEntities()
-end
-
-function Collision:isEntityValid(handle)
-    if not (DoesEntityExist(handle)) then return false end
-    if not (self:isEntityInside(handle)) then return false end
-    if (lib.bIsServer) then
-        if not (GetEntityRoutingBucket(handle) == self.dimension) then return false end
-    end
-    return true
 end
 
 function Collision:isEntityInside(handle)

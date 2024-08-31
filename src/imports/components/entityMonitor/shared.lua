@@ -20,7 +20,7 @@ function EntityMonitor.new(options)
     lib.typeCheck(options, "table", "nil")
 
     options = options or {}
-    options.types = options.types or { "ped", "vehicle", "object", "playerped" }
+    options.types = options.types or { "ped", "vehicle", "object" }
 
     local self = setmetatable({}, EntityMonitor)
     self.types = lib.set.fromArray(options.types)
@@ -29,45 +29,51 @@ function EntityMonitor.new(options)
     self.natives = {}
 
     self.tickpool = lib.setInterval(function()
-        local pools = {}
+        if (self.dispatcher:size() > 0) then
+            local pools = {}
 
-        if (self.types:contain("object")) then
-            pools["object"] = lib.game.getObjects()
-        end
-
-        if (self.types:contain("ped")) then
-            pools["ped"] = getNonPlayerPeds()
-        end
-
-        if (self.types:contain("vehicle")) then
-            pools["vehicle"] = lib.game.getVehicles()
-        end
-
-        if (self.types:contain("playerped")) then
-            pools["playerped"] = lib.game.getPlayerPeds()
-        end
-
-        -- merge all pools into one
-        local entities = {}
-        for poolType, entityHandles in pairs(pools) do
-            for i = 1, #entityHandles, 1 do
-                entities[#entities + 1] = { handle = entityHandles[i], type = poolType }
-            end
-        end
-
-        -- iterate through all entities and get their properties
-        local entityCount = #entities
-        for i = 1, entityCount, 1 do
-            local entityHandle = entities[i].handle
-            local entityInfo = {}
-            entityInfo.handle = entityHandle
-
-            for entryName, propertyGetter in pairs(self.natives) do
-                local result = propertyGetter(entityHandle)
-                entityInfo[entryName] = result
+            if (self.types:contain("object")) then
+                pools["object"] = lib.game.getObjects()
             end
 
-            self.dispatcher:broadcast(entityInfo, { type = entityHandle, index = i, count = entityCount })
+            if (self.types:contain("ped")) then
+                pools["ped"] = getNonPlayerPeds()
+            end
+
+            if (self.types:contain("vehicle")) then
+                pools["vehicle"] = lib.game.getVehicles()
+            end
+
+            if (self.types:contain("playerped")) then
+                pools["playerped"] = lib.game.getPlayerPeds()
+            end
+
+            if (self.types:contain("localplayerped")) then
+                pools["localplayerped"] = { PlayerPedId() }
+            end
+
+            -- merge all pools into one
+            local entities = {}
+            for poolType, entityHandles in pairs(pools) do
+                for i = 1, #entityHandles, 1 do
+                    entities[#entities + 1] = { handle = entityHandles[i], type = poolType }
+                end
+            end
+
+            -- iterate through all entities and get their properties
+            local entityCount = #entities
+            for i = 1, entityCount, 1 do
+                local entityHandle = entities[i].handle
+                local entityInfo = {}
+                entityInfo.handle = entityHandle
+
+                for entryName, propertyGetter in pairs(self.natives) do
+                    local result = propertyGetter(entityHandle)
+                    entityInfo[entryName] = result
+                end
+
+                self.dispatcher:broadcast(entityInfo, { type = entityHandle, index = i, count = entityCount })
+            end
         end
     end, self.tickRate)
 
@@ -121,8 +127,8 @@ end
 cslib_component = setmetatable({
     new = EntityMonitor.new,
 }, {
-    __call = function()
-        return EntityMonitor.new()
+    __call = function(tbl, ...)
+        return EntityMonitor.new(...)
     end,
 })
 
