@@ -1,3 +1,9 @@
+-- todo:
+-- 1. Polygon points
+-- 2. Circle
+-- 3. Box doesn't apply heading
+
+
 local colshape_classWarp = function(class, ...)
     return setmetatable({
         new = class.new,
