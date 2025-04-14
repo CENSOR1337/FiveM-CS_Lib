@@ -35,7 +35,12 @@ locale = function(string, vars, lang)
         return ("\"%s\" was not found in the \"%s\" dictionary"):format(string, lang)
     end
     if (vars) then
-        localeString = string_gsub(localeString, "%${([%w_]+)}", vars)
+        local success, resp = pcall(function()
+            localeString = string_gsub(localeString, "%${([%w_]+)}", vars)
+        end)
+        if (not success) then
+            return "something went wrong while replacing variables in the string: " .. localeString .. " with vars: " .. tostring(vars)
+        end
     end
     return localeString
 end
