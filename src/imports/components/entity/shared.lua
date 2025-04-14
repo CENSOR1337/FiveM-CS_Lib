@@ -24,6 +24,13 @@ local typeEnum = {
 
 local Entity = {}
 Entity.__index = Entity
+Entity.__instances = {}
+
+lib.resource.onStop(function()
+    for key, value in pairs(Entity.__instances) do
+        value:destroy()
+    end
+end)
 
 local classWarp = function(class, ...)
     return setmetatable({
@@ -71,6 +78,7 @@ function Entity.new(modelHash, position, rotation, entityType, isNetwork)
         self:setPosition(self.position)
         self:setRotation(self.rotation)
         self.onCreatedDispatcher:broadcast()
+        Entity.__instances[#Entity.__instances + 1] = self
     end)
 
     return self
