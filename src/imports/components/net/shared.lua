@@ -61,8 +61,43 @@ local promise = promise
 local Await = Citizen.Await
 local table_unpack = table.unpack
 
+local is_server = lib.isServer
 local prefix = "cslib.cb:"
 local timeoutTime = 10 * 1000
+
+local invoke_event = ("cslib.cb.invoke:%s"):format(lib.resource.name)
+local pending_callbacks = {}
+
+lib.onNet(invoke_event, function(id, ...)
+    if not (is_server) then
+        if source == "" then return end
+    end
+
+    local listener = pending_callbacks[id]
+
+    if not (listener) then return end
+
+    pending_callbacks[id] = nil
+
+    listener(...)
+end)
+
+local function create_listener(eventname, listener, src)
+    local id
+
+    repeat
+        if (is_server) then
+            id = ("%s:%s:%s"):format(eventname, math.random(0, 1000000), src)
+        else
+            id = ("%s:%s"):format(eventname, math.random(0, 1000000))
+        end
+    until not pending_callbacks[id]
+
+    pending_callbacks[id] = listener
+
+    return id
+end
+
 
 local function registerCallback(eventname, listener)
     local cbEventName = prefix .. eventname
@@ -71,29 +106,28 @@ local function registerCallback(eventname, listener)
         local src = source
 
         if (lib.isServer) then
-            lib.emitClient(id, src, listener(...))
+            lib.emitClient(invoke_event, src, id, listener(...))
         else
-            lib.emitServer(id, listener(...))
+            lib.emitServer(invoke_event, id, listener(...))
         end
     end)
 end
 
 local function triggerCallback(eventname, src, listener, ...)
-    local callbackId = lib.randomUUID()
     local cbEventName = prefix .. eventname
 
     if (lib.isServer) then
+        local callbackId = create_listener(cbEventName, listener, src)
         lib.assertType(src, "number", "string")
         lib.assertType(listener, "function", "table")
 
-        lib.onceClient(callbackId, listener)
         lib.emitClient(cbEventName, src, callbackId, ...)
     else
         -- if client triggering server callback src or player id is not required
         -- src is going to be listener
+        local callbackId = create_listener(cbEventName, src)
         lib.assertType(src, "function", "table")
 
-        lib.onceServer(callbackId, src)
         lib.emitServer(cbEventName, callbackId, listener, ...)
     end
 end
