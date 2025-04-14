@@ -47,9 +47,7 @@ lib.registerServerCallback = lib.net.registerServerCallback
 lib.emitClient = isServer and function(eventName, playerId, ...)
     playerId = type("number") and playerId or tonumber(playerId)
 
-    if (playerId <= 0) then
-        error("cslib: [emitClient] with -1 is not allowed, use emitAllClients instead")
-    end
+    assert(playerId ~= nil and playerId > 0, ("cslib: [emitClient] %s(%s) is not a valid playerId"):format(playerId, eventName))
 
     TriggerClientEvent(eventName, playerId, ...)
 end
