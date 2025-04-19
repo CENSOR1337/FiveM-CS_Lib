@@ -126,7 +126,7 @@ function CreateCSyncedObject(classname)
                 self.__objects[id] = self:new(table_unpack(args))
             end
         end
-        lib.resource.on_server(("rep:%s:new"):format(self.__classname), new_inst)
+        lib.resource.onServer(("rep:%s:new"):format(self.__classname), new_inst)
 
         local destroy_inst = function(id)
             if (self.__objects[id]) then
@@ -134,7 +134,7 @@ function CreateCSyncedObject(classname)
                 self.__objects[id] = nil
             end
         end
-        lib.resource.on_server(("rep:%s:destroy"):format(self.__classname), destroy_inst)
+        lib.resource.onServer(("rep:%s:destroy"):format(self.__classname), destroy_inst)
     end
 
     lib.resource.onStop(function()
