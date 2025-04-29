@@ -90,3 +90,5 @@ lib.import = lib.module.import
 lib.init = function()
     lib.time.getNetTime() -- client call, server register, a callback
 end
+
+lib.coalesce = lib.common.coalesce
